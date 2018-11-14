@@ -14,7 +14,7 @@ namespace ExaltedCharm.Api.Controllers
     [Route("api/Durations")]
     public class DurationController : Controller
     {
-        private readonly IRepository _repository;
+        private readonly IRepository _repository;   
 
         public DurationController(IRepository repository)
         {
