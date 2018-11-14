@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExaltedCharm.Api", "ExaltedCharm.Api\ExaltedCharm.Api.csproj", "{6AA8888F-D795-4F32-9B3F-F7B661509F01}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6AA8888F-D795-4F32-9B3F-F7B661509F01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AA8888F-D795-4F32-9B3F-F7B661509F01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AA8888F-D795-4F32-9B3F-F7B661509F01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AA8888F-D795-4F32-9B3F-F7B661509F01}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EB5AB978-7277-475A-ACC0-18C7FF7690EB}
+	EndGlobalSection
+EndGlobal
