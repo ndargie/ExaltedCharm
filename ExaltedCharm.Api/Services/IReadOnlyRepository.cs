@@ -17,12 +17,15 @@ namespace ExaltedCharm.Api.Services
             int? take = null)
             where TEntity : class, IEntity;
 
-        Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            string includeProperties = null,
-            int? skip = null,
-            int? take = null)
+        IQueryable<TEntity> GetAllOrderBy<TEntity, TDestination>(string orderBy)
             where TEntity : class, IEntity;
+
+        Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+        string includeProperties = null,
+        int? skip = null,
+        int? take = null)
+        where TEntity : class, IEntity;
 
         IEnumerable<TEntity> Get<TEntity>(
             Expression<Func<TEntity, bool>> filter = null,
@@ -80,6 +83,6 @@ namespace ExaltedCharm.Api.Services
         Task<bool> GetExistsAsync<TEntity>(Expression<Func<TEntity, bool>> filter = null)
             where TEntity : class, IEntity;
 
-       
+
     }
 }

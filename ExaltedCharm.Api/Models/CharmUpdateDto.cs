@@ -2,13 +2,14 @@
 
 namespace ExaltedCharm.Api.Models
 {
-    public class CharmUpdateDto
+    public class CharmUpdateDto : CharmForManipulationDto
+
     {
-        [Required(ErrorMessage = "Name is required")]
-        [MaxLength(50, ErrorMessage = "Name must be less than 50 characters")]
-        [MinLength(4, ErrorMessage = "Name must be at least 4 characters")]
-        public string Name { get; set; }
-        [MaxLength(600, ErrorMessage = "Description must be less than 600 characters")]
-        public string Description { get; set; }
+        [Required(ErrorMessage = "You should fill out a description")]
+        public override string Description
+        {
+            get => base.Description;
+            set => base.Description = value;
+        }
     }
 }

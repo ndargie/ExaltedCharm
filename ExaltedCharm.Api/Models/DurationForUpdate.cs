@@ -2,12 +2,13 @@
 
 namespace ExaltedCharm.Api.Models
 {
-    public class DurationForUpdate
+    public class DurationForUpdate : DurationForManipulationDto
     {
-        [Required]
-        [MaxLength(100)]
-        public string Name { get; set; }
-        [MaxLength(200)]
-        public string Description { get; set; }
+        [Required(ErrorMessage = "You should fill out a description")]
+        public override string Description
+        {
+            get => base.Description;
+            set => base.Description = value;
+        }
     }
 }

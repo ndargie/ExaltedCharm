@@ -105,7 +105,7 @@ namespace ExaltedCharm.Api.Controllers
             return CreatedAtRoute("GetCharm", new { charmTypeId, id = finalCharm.Id }, finalCharm);
         }
 
-        [HttpPut("{charmTypeId}/charms/{id}")]
+        [HttpPut("{charmTypeId}/charms/{id}", Name = "UpdateCharm")]
         public IActionResult UpdateCharm(int charmTypeId, int id, [FromBody] CharmUpdateDto charm)
         {
             if (charm == null)
@@ -148,7 +148,7 @@ namespace ExaltedCharm.Api.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{charmTypeId}/charms/{id}")]
+        [HttpPatch("{charmTypeId}/charms/{id}", Name = "PartiallyUpdateCharm")]
         public IActionResult PartiallyUpdateCharm(int charmTypeId, int id, [FromBody] JsonPatchDocument<CharmUpdateDto> patchDocument)
         {
             if (patchDocument == null)
@@ -198,7 +198,7 @@ namespace ExaltedCharm.Api.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{charmTypeId}/charms/{id}")]
+        [HttpDelete("{charmTypeId}/charms/{id}", Name = "DeleteCharm")]
         public IActionResult DeleteCharm(int charmTypeId, int id)
         {
             if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))

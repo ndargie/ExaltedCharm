@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using ExaltedCharm.Api.Entities;
+using ExaltedCharm.Api.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExaltedCharm.Api.Services
@@ -12,10 +13,13 @@ namespace ExaltedCharm.Api.Services
         where TContext : DbContext
     {
         protected readonly TContext _context;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public EntityFrameworkReadOnlyRepository(TContext context)
+        public EntityFrameworkReadOnlyRepository(TContext context, 
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
         protected virtual IQueryable<TEntity> GetQueryable<TEntity>(
@@ -66,6 +70,12 @@ namespace ExaltedCharm.Api.Services
             where TEntity : class, IEntity
         {
             return GetQueryable(null, orderBy, includeProperties, skip, take);
+        }
+
+        public virtual IQueryable<TEntity> GetAllOrderBy<TEntity, TDestination>(string orderBy) where TEntity : class, IEntity
+        {
+            var query = _context.Set<TEntity>();
+            return query.ApplySort(orderBy, _propertyMappingService.GetPropertyMapping<TEntity, TDestination>());
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(

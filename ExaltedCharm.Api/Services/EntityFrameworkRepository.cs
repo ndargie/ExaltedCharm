@@ -8,11 +8,8 @@ namespace ExaltedCharm.Api.Services
     public class EntityFrameworkRepository<TContext> : EntityFrameworkReadOnlyRepository<TContext>, IRepository
         where TContext : DbContext
     {
-        private readonly TContext _context;
-
-        public EntityFrameworkRepository(TContext context) : base(context)
+        public EntityFrameworkRepository(TContext context, IPropertyMappingService propertyMappingService) :  base(context, propertyMappingService)
         {
-            _context = context;
         }
 
         public void Create<TEntity>(TEntity entity, string createdBy = null) where TEntity : class, IEntity

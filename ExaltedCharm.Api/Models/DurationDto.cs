@@ -1,6 +1,6 @@
 ﻿namespace ExaltedCharm.Api.Models
 {
-    public class DurationDto
+    public class DurationDto : LinkedResourceBaseDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

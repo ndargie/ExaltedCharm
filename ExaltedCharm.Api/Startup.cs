@@ -3,12 +3,18 @@ using ExaltedCharm.Api.Extensions;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 
 namespace ExaltedCharm.Api
 {
@@ -26,15 +32,15 @@ namespace ExaltedCharm.Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(setupAction =>
-                {
-                    setupAction.ReturnHttpNotAcceptable = true;
-                })
+            services.AddMvc(setupAction => { setupAction.ReturnHttpNotAcceptable = true; })
                 .AddMvcOptions(o =>
                 {
                     o.OutputFormatters
                         .Add(new XmlDataContractSerializerOutputFormatter());
                     o.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
+                }).AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 });
 
 #if DEBUG
@@ -48,6 +54,14 @@ namespace ExaltedCharm.Api
             services.AddDbContext<CharmContext>(o => o.UseSqlServer(connectionString));
             services.AddScoped<IReadOnlyRepository, EntityFrameworkReadOnlyRepository<CharmContext>>();
             services.AddScoped<IRepository, EntityFrameworkRepository<CharmContext>>();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
+            {
+                var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
+                return new UrlHelper(actionContext);
+            });
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+            services.AddTransient<ITypeHelperService, TypeHelperService>();
             //.AddJsonOptions(o =>
             //{
             //    if (o.SerializerSettings.ContractResolver != null)
@@ -59,7 +73,7 @@ namespace ExaltedCharm.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, CharmContext charmTypeContext)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, CharmContext charmTypeContext, ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
             {
@@ -71,6 +85,11 @@ namespace ExaltedCharm.Api
                 {
                     appBuilder.Run(async context =>
                     {
+                        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+                        if (exceptionHandlerFeature != null)
+                        {
+                            logger.LogError(500, exceptionHandlerFeature.Error, exceptionHandlerFeature.Error.Message);
+                        }
                         context.Response.StatusCode = 500;
                         await context.Response.WriteAsync("An unexpected fault happened. Try again later.");
                     });
