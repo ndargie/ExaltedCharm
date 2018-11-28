@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using ExaltedCharm.Api.Entities;
+using ExaltedCharm.Api.Helpers;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SQLitePCL;
 
 namespace ExaltedCharm.Api.Controllers
 {
@@ -17,17 +19,19 @@ namespace ExaltedCharm.Api.Controllers
         private readonly ILogger<CharmController> _logger;
         private readonly IMailService _localMailService;
         private readonly IRepository _repository;
+        private readonly IUrlHelper _urlHelper;
 
         public CharmController(ILogger<CharmController> logger,
             IMailService localMailService,
-            IRepository repository)
+            IRepository repository, IUrlHelper urlHelper)
         {
             _logger = logger;
             _localMailService = localMailService;
             _repository = repository;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet("{charmTypeId}/charms")]
+        [HttpGet("{charmTypeId}/charms", Name = "GetCharmsForCharmType")]
         public IActionResult GetCharms(int charmTypeId)
         {
             try
@@ -39,8 +43,13 @@ namespace ExaltedCharm.Api.Controllers
                 }
                 var charms = _repository.GetAll<Charm>()
                     .Where(x => x.CharmTypeId == charmTypeId).ToList();
-                var charmsForResult = AutoMapper.Mapper.Map<IEnumerable<CharmDto>>(charms);
-                return Ok(charmsForResult);
+                var charmsForResult = Mapper.Map<IEnumerable<CharmDto>>(charms).Select(x =>
+                    {
+                        x = x.GenerateLinks(_urlHelper);
+                        return x;
+                    });
+                var wrapper = new LinkedCollectionResourceWrapperDto<CharmDto>(charmsForResult);
+                return Ok(wrapper.CreateCharmTypeLinksForCharms(_urlHelper));
             }
             catch (Exception ex)
             {
@@ -65,7 +74,7 @@ namespace ExaltedCharm.Api.Controllers
             }
 
             var charmDto = AutoMapper.Mapper.Map<CharmDto>(charm);
-            return Ok(charmDto);
+            return Ok(charmDto.GenerateLinks(_urlHelper));
         }
 
         [HttpPost("{charmTypeId}/charms")]
@@ -102,7 +111,8 @@ namespace ExaltedCharm.Api.Controllers
                 StatusCode(500, "A problem happened while handling your request.");
             }
 
-            return CreatedAtRoute("GetCharm", new { charmTypeId, id = finalCharm.Id }, finalCharm);
+            return CreatedAtRoute("GetCharm", new {charmTypeId, id = finalCharm.Id},
+                Mapper.Map<CharmDto>(finalCharm).GenerateLinks(_urlHelper));
         }
 
         [HttpPut("{charmTypeId}/charms/{id}", Name = "UpdateCharm")]
@@ -135,7 +145,10 @@ namespace ExaltedCharm.Api.Controllers
                 charmToAdd.Id = id;
                 var charmType = _repository.GetAll<CharmType>().Single(x => x.Id == charmTypeId);
                 charmType.Charms.Add(charmToAdd);
-                return _repository.Save() ? StatusCode(500, "A problem happend while handling your request") : CreatedAtRoute("GetCharm", new { charmTypeId, id = charmToAdd.Id }, Mapper.Map<CharmDto>(charmToAdd));
+                return _repository.Save()
+                    ? StatusCode(500, "A problem happend while handling your request")
+                    : CreatedAtRoute("GetCharm", new {charmTypeId, id = charmToAdd.Id},
+                        Mapper.Map<CharmDto>(charmToAdd).GenerateLinks(_urlHelper));
             }
 
             Mapper.Map(charm, charmEntity);
@@ -167,7 +180,7 @@ namespace ExaltedCharm.Api.Controllers
                 return NotFound();
             }
 
-            var charmToPatch = AutoMapper.Mapper.Map<CharmUpdateDto>(charmEntity);
+            var charmToPatch = Mapper.Map<CharmUpdateDto>(charmEntity);
 
             patchDocument.ApplyTo(charmToPatch, ModelState);
 
@@ -188,7 +201,7 @@ namespace ExaltedCharm.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            AutoMapper.Mapper.Map(charmToPatch, charmEntity);
+            Mapper.Map(charmToPatch, charmEntity);
             _repository.Update(charmEntity);
             if (!_repository.Save())
             {
@@ -224,7 +237,7 @@ namespace ExaltedCharm.Api.Controllers
             return NoContent();
         }
 
-        [HttpGet("{charmTypeId}/charms/{id}/keywords")]
+        [HttpGet("{charmTypeId}/charms/{id}/keywords", Name = "GetKeywordsForCharm")]
         public IActionResult GetKeywords(int charmTypeId, int id)
         {
             if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))
@@ -238,7 +251,11 @@ namespace ExaltedCharm.Api.Controllers
                 return NotFound();
             }
 
-            var keywords = AutoMapper.Mapper.Map<IEnumerable<KeywordDto>>(charm.Keywords.Select(x => x.Keyword));
+            var keywords = Mapper.Map<IEnumerable<KeywordDto>>(charm.Keywords.Select(x =>  x.Keyword)).Select(x =>
+                {
+                    x = x.GenerateLinks(_urlHelper, charmTypeId, id);
+                    return x;
+                });
             return Ok(keywords);
         }
 
@@ -261,11 +278,11 @@ namespace ExaltedCharm.Api.Controllers
             }
 
             var keyword =
-                AutoMapper.Mapper.Map<KeywordDto>(charm.Keywords.Single(x => x.KeywordId == keywordId).Keyword);
-            return Ok(keyword);
+                Mapper.Map<KeywordDto>(charm.Keywords.Single(x => x.KeywordId == keywordId).Keyword);
+            return Ok(keyword.GenerateLinks(_urlHelper, charmTypeId, id));
         }
 
-        [HttpPost("{charmTypeId}/charms/{id}/keywords/{keywordId}")]
+        [HttpPut("{charmTypeId}/charms/{id}/keywords/{keywordId}", Name = "AddKeywordToCharm")]
         public IActionResult AddKeywordToCharm(int charmTypeId, int id, int keywordId)
         {
             if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))
@@ -293,10 +310,11 @@ namespace ExaltedCharm.Api.Controllers
                 return StatusCode(500, "A problem happened while handling your request");
             }
 
-            return CreatedAtRoute("GetCharmKeyword", new {charmTypeId, id, keywordId}, keyword);
+            return CreatedAtRoute("GetCharmKeyword", new {charmTypeId, id, keywordId},
+                Mapper.Map<KeywordDto>(keyword).GenerateLinks(_urlHelper, charmTypeId, id));
         }
 
-        [HttpDelete("{charmTypeId}/charms/{id}/keywords/{keywordId}")]
+        [HttpPut("{charmTypeId}/charms/{id}/keywords/{keywordId}", Name = "RemoveKeywordFromCharm")]
         public IActionResult RemoveKeyword(int charmTypeId, int id, int keywordId)
         {
             if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))

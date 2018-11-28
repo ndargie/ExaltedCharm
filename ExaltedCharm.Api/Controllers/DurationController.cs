@@ -95,9 +95,15 @@ namespace ExaltedCharm.Api.Controllers
                 return NotFound();
             }
 
-            var durationDto = Mapper.Map<DurationDto>(duration).CreateLinksForDuration(_urlHelper);
+            var durationDto = Mapper.Map<DurationDto>(duration);
 
-            return Ok(durationDto.ShapeData(fields));
+            var links = CreateLinksForDuration(id, fields);
+
+            var linkedResourceToReturn = durationDto.ShapeData(fields) as IDictionary<string, object>;
+
+            linkedResourceToReturn.Add("links", links);
+
+            return Ok();
         }
 
         [HttpGet("{id}/Charms", Name = "GetCharmsForDuration")]
@@ -116,7 +122,7 @@ namespace ExaltedCharm.Api.Controllers
                 return x = x.GenerateLinks(_urlHelper);
             });
             var wrapper = new LinkedCollectionResourceWrapperDto<CharmDto>(charms);
-            return Ok(wrapper.CreateLinksForCharms(_urlHelper));
+            return Ok(wrapper.CreateDurationLinksForCharms(_urlHelper));
         }
 
         [HttpPost]
@@ -253,6 +259,28 @@ namespace ExaltedCharm.Api.Controllers
             }
 
             return NoContent();
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForDuration(int id, string fields)
+        {
+            var links = new List<LinkDto>
+            {
+                string.IsNullOrWhiteSpace(fields)
+                    ? new LinkDto(_urlHelper.Link("GetDuration", new {id = id}), "self", "GET")
+                    : new LinkDto(_urlHelper.Link("GetDuration", new {id = id, fields = fields}), "self", "GET"),
+                new LinkDto(_urlHelper.Link("GetCharmsForDuration", new {id = id}),
+                    "get-charms", "GET"),
+                new LinkDto(_urlHelper.Link("DeleteDuration", new {id = id}), "delete_duration",
+                    "DELETE"),
+                new LinkDto(_urlHelper.Link("UpdateDuration", new {id = id}), "update_duration",
+                    "PUT"),
+                new LinkDto(_urlHelper.Link("PartiallyUpdateDuration", new {id = id}),
+                    "partially_update_duration",
+                    "PATCH")
+            };
+
+            return links;
+
         }
 
        

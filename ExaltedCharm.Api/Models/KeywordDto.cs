@@ -1,6 +1,6 @@
 ﻿namespace ExaltedCharm.Api.Models
 {
-    public class KeywordDto
+    public class KeywordDto : LinkedResourceBaseDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

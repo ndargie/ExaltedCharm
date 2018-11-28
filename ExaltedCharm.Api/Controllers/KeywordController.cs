@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using ExaltedCharm.Api.Entities;
+using ExaltedCharm.Api.Helpers;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
 using Microsoft.AspNetCore.JsonPatch;
@@ -13,17 +13,23 @@ namespace ExaltedCharm.Api.Controllers
     public class KeywordController : Controller
     {
         private readonly IRepository _repository;
+        private readonly IUrlHelper _urlHelper;
 
-        public KeywordController(IRepository repository)
+        public KeywordController(IRepository repository, IUrlHelper urlHelper)
         {
             _repository = repository;
+            _urlHelper = urlHelper;
         }
 
         [HttpGet]
         public IActionResult GetKeywords()
         {
             var keywords = _repository.GetAll<Keyword>().ToList();
-            var keywordDtos = AutoMapper.Mapper.Map<IEnumerable<KeywordDto>>(keywords);
+            var keywordDtos = AutoMapper.Mapper.Map<IEnumerable<KeywordDto>>(keywords).Select(x =>
+                {
+                    x = x.GenerateLinks(_urlHelper);
+                    return x;
+                });
             return Ok(keywordDtos);
         }
 
@@ -35,11 +41,12 @@ namespace ExaltedCharm.Api.Controllers
             {
                 return NotFound();
             }
-            var keywordDto = AutoMapper.Mapper.Map<KeywordDto>(keyword);
+
+            var keywordDto = AutoMapper.Mapper.Map<KeywordDto>(keyword).GenerateLinks(_urlHelper);
             return Ok(keywordDto);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateKeyword")]
         public IActionResult CreateKeyword([FromBody] KeywordCreationDto keyword)
         {
             if (keyword == null)
@@ -59,10 +66,11 @@ namespace ExaltedCharm.Api.Controllers
                 return StatusCode(500, "A problem happened while handling your request.");
             }
 
-            return CreatedAtRoute("GetKeyword", new { id = finalKeyword.Id }, keyword);
+            return CreatedAtRoute("GetKeyword", new {id = finalKeyword.Id},
+                AutoMapper.Mapper.Map<KeywordDto>(finalKeyword).GenerateLinks(_urlHelper));
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateKeyword")]
         public IActionResult UpdateKeyword(int id,
             [FromBody] KeywordUpdateDto keyword)
         {
@@ -91,7 +99,7 @@ namespace ExaltedCharm.Api.Controllers
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateKeyword")]
         public IActionResult PatchKeyword(int id,
             [FromBody] JsonPatchDocument<KeywordUpdateDto> patchDocument)
         {
@@ -122,6 +130,24 @@ namespace ExaltedCharm.Api.Controllers
             }
             AutoMapper.Mapper.Map(keywordToPatch, keywordEntity);
             _repository.Update(keywordEntity);
+            if (!_repository.Save())
+            {
+                return StatusCode(500, "A problem happened while handling your request.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}", Name = "DeleteKeyword")]
+        public IActionResult DeleteKeyword(int id)
+        {
+            var keyword = _repository.GetAll<Keyword>().SingleOrDefault(x => x.Id == id);
+            if (keyword == null)
+            {
+                return NotFound();
+            }
+
+            _repository.Delete(keyword);
             if (!_repository.Save())
             {
                 return StatusCode(500, "A problem happened while handling your request.");

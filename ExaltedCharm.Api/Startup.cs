@@ -105,6 +105,8 @@ namespace ExaltedCharm.Api
                     cfg.CreateMap<Entities.Charm, Models.CharmDto>().ForMember(dest => dest.Cost,
                         opt => opt.MapFrom(src => src.GetCharmCost()));
                     cfg.CreateMap<Entities.CharmType, Models.CharmTypeDto>();
+                    cfg.CreateMap<Models.CharmTypeCreationDto, Entities.CharmType>();
+                    cfg.CreateMap<Models.CharmUpdateDto, Entities.CharmType>();
                     cfg.CreateMap<Models.CharmCreationDto, Entities.Charm>();
                     cfg.CreateMap<Models.CharmUpdateDto, Entities.Charm>();
                     cfg.CreateMap<Entities.Charm, Models.CharmUpdateDto>();
