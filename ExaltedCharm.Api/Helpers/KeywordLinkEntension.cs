@@ -21,7 +21,7 @@ namespace ExaltedCharm.Api.Helpers
                     urlHelper.Link("RemoveKeywordFromCharm",
                         new {charmTypeId = charmTypeId.Value, id = charmId.Value, keywordId = keyword.Id}),
                     "remove_keyword_from_charm",
-                    "PUT"));
+                    "DELETE"));
             }
             else
             {

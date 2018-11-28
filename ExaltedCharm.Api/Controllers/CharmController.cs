@@ -314,7 +314,7 @@ namespace ExaltedCharm.Api.Controllers
                 Mapper.Map<KeywordDto>(keyword).GenerateLinks(_urlHelper, charmTypeId, id));
         }
 
-        [HttpPut("{charmTypeId}/charms/{id}/keywords/{keywordId}", Name = "RemoveKeywordFromCharm")]
+        [HttpDelete("{charmTypeId}/charms/{id}/keywords/{keywordId}", Name = "RemoveKeywordFromCharm")]
         public IActionResult RemoveKeyword(int charmTypeId, int id, int keywordId)
         {
             if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))
@@ -328,14 +328,14 @@ namespace ExaltedCharm.Api.Controllers
                 return NotFound();
             }
 
-            var keyword = _repository.GetFirst<Keyword>(x => x.Id == keywordId);
+            var keyword = charm.Keywords.SingleOrDefault(x => x.Keyword.Id == keywordId);
 
             if (keyword == null)
             {
                 return NotFound();
             }
 
-            charm.RemoveKeyword(keyword);
+            charm.Keywords.Remove(keyword);
             _repository.Update(charm);
             if (!_repository.Save())
             {
