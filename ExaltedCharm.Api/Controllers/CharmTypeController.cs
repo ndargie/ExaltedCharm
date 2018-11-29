@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using ExaltedCharm.Api.Entities;
 using ExaltedCharm.Api.Helpers;
 using ExaltedCharm.Api.Models;
@@ -7,54 +8,148 @@ using ExaltedCharm.Api.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace ExaltedCharm.Api.Controllers
 {
-   
+
     [Route("api/charmTypes")]
     public class CharmTypeController : Controller
     {
         private readonly IRepository _charmTypeRepository;
         private readonly IUrlHelper _urlHelper;
+        private readonly IPropertyMappingService _propertyMappingService;
+        private readonly ITypeHelperService _typeHelperService;
 
-        public CharmTypeController(IRepository charmTypeRepository, IUrlHelper urlHelper)
+        public CharmTypeController(IRepository charmTypeRepository, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService, ITypeHelperService typeHelperService)
         {
             _charmTypeRepository = charmTypeRepository;
             _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet(Name = "GetCharmTypes")]
-        public IActionResult GetCharmTypes()
+        public IActionResult GetCharmTypes(CharmTypeResourceParameter charmTypeResourceParameter,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
-            var charmTypes = _charmTypeRepository.GetAll<CharmType>().ToList();
+            if (!_propertyMappingService.ValidMappingExistsFor<CharmType, CharmTypeDto>
+                (charmTypeResourceParameter.OrderBy))
+            {
+                return BadRequest();
+            }
 
-            var results = AutoMapper.Mapper.Map<IEnumerable<CharmTypeWithoutCharmsDto>>(charmTypes).Select(x =>
+            if (!_typeHelperService.TypeHasProperties<CharmTypeDto>(charmTypeResourceParameter.Fields))
+            {
+                return BadRequest();
+            }
+
+            var charmTypes = _charmTypeRepository
+                .GetAllOrderBy<CharmType, CharmTypeDto>(charmTypeResourceParameter.OrderBy)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(charmTypeResourceParameter.Name))
+            {
+                var whereClause = charmTypeResourceParameter.Name.Trim().ToLowerInvariant();
+                charmTypes = charmTypes.Where(x => x.Name.ToLowerInvariant() == whereClause);
+            }
+
+            var pagedList = PagedList<CharmType>.Create(charmTypes, charmTypeResourceParameter.PageNumber,
+                charmTypeResourceParameter.PageSize);
+
+            var filters = string.IsNullOrWhiteSpace(charmTypeResourceParameter.Name)
+                ? new Dictionary<string, string>()
+                : new Dictionary<string, string>()
                 {
-                    x = x.GenerateLinks(_urlHelper);
-                    return x;
+                    {
+                        "Name", charmTypeResourceParameter.Name
+                    }
+                };
+
+            if (mediaType == "application/vnd.exalted.hateoas+json")
+            {
+                var pageMetsaData =
+                    charmTypeResourceParameter.GeneratePagingMetaData(pagedList, "GetCharmTypes", _urlHelper);
+
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
+
+                var links = charmTypeResourceParameter.GeneratePagingLinkData("GetCharmTypes", pagedList.HasNext,
+                    pagedList.HasPrevious, _urlHelper, filters);
+                var shapedCharmTypes = Mapper.Map<IEnumerable<CharmTypeDto>>(pagedList).ShapeData(charmTypeResourceParameter.Fields);
+
+                var shapedCharmTypesWithLinks = shapedCharmTypes.Select(keyword =>
+                {
+                    var charmTypeAsDictionary = keyword as IDictionary<string, object>;
+                    var keywordLink =
+                        CreateLinksForCharmType((int)charmTypeAsDictionary["Id"], charmTypeResourceParameter.Fields);
+                    charmTypeAsDictionary.Add("links", keywordLink);
+                    return charmTypeAsDictionary;
                 });
 
-            return Ok(results);
+                var linkedCollectionResource = new
+                {
+                    value = shapedCharmTypesWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
+            {
+                var pageMetsaData =
+                    charmTypeResourceParameter.GeneratePagingMetaData(pagedList, "GetCharmTypes", _urlHelper, filters,
+                        pagedList.HasNext, pagedList.HasPrevious);
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
+                return Ok(Mapper.Map<IEnumerable<CharmTypeDto>>(charmTypes).ShapeData(charmTypeResourceParameter.Fields));
+            }
         }
 
         [HttpGet("{id}", Name = "GetCharmType")]
-        public IActionResult GetCharmType(int id, bool includeCharms = false)
+        public IActionResult GetCharmType(int id, string fields, [FromHeader(Name = "Accept")] string mediaType, bool includeCharms = false)
         {
+
+            if (!_typeHelperService.
+                TypeHasProperties<KeywordDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var charmType = _charmTypeRepository.GetFirst<CharmType>(x => x.Id == id, null, includeCharms ? "Charms" : null);
             if (charmType == null)
             {
                 return NotFound();
             }
 
+            if (mediaType == "application/vnd.exalted.hateoas+json")
+            {
+                var links = CreateLinksForCharmType(id, fields, includeCharms);
+                if (includeCharms)
+                {
+                    var linkedResourceToReturn = Mapper.Map<CharmTypeDto>(charmType).ShapeData(fields) as IDictionary<string, object>;
+
+                    linkedResourceToReturn.Add("links", links);
+
+                    return Ok(linkedResourceToReturn);
+                }
+                else
+                {
+                    var linkedResourceToReturn = Mapper.Map<CharmTypeWithoutCharmsDto>(charmType).ShapeData(fields) as IDictionary<string, object>;
+
+                    linkedResourceToReturn.Add("links", links);
+
+                    return Ok(linkedResourceToReturn);
+                }
+            }
+
             if (includeCharms)
             {
-                var charmTypeDto = AutoMapper.Mapper.Map<CharmTypeDto>(charmType);
-                return Ok(charmTypeDto.GenerateLinks(_urlHelper));
+                var charmTypeDto = Mapper.Map<CharmTypeDto>(charmType);
+                return Ok(charmTypeDto.ShapeData(fields));
             }
             else
             {
-                var charmTypeDto = AutoMapper.Mapper.Map<CharmTypeWithoutCharmsDto>(charmType)
-                    .GenerateLinks(_urlHelper);
+                var charmTypeDto = Mapper.Map<CharmTypeWithoutCharmsDto>(charmType).ShapeData(fields);
                 return Ok(charmTypeDto);
             }
         }
@@ -72,12 +167,12 @@ namespace ExaltedCharm.Api.Controllers
                 return new UnprocessableEntityObjectResult(ModelState);
             }
 
-            var charmTypeEntity = AutoMapper.Mapper.Map<CharmType>(charmType);
+            var charmTypeEntity = Mapper.Map<CharmType>(charmType);
             _charmTypeRepository.Create(charmTypeEntity);
 
             return !_charmTypeRepository.Save()
                 ? StatusCode(500, "A problem happened while handling your request.")
-                : CreatedAtRoute("GetCharmType", new {id = charmTypeEntity.Id},
+                : CreatedAtRoute("GetCharmType", new { id = charmTypeEntity.Id },
                     AutoMapper.Mapper.Map<CharmTypeDto>(charmTypeEntity).GenerateLinks(_urlHelper));
         }
 
@@ -100,7 +195,7 @@ namespace ExaltedCharm.Api.Controllers
                 return NotFound();
             }
 
-            AutoMapper.Mapper.Map(charmType, charmTypeEntity);
+            Mapper.Map(charmType, charmTypeEntity);
 
             _charmTypeRepository.Update(charmTypeEntity);
 
@@ -139,7 +234,7 @@ namespace ExaltedCharm.Api.Controllers
 
                 return !_charmTypeRepository.Save()
                     ? StatusCode(500, "A problem happened while handling your request.")
-                    : CreatedAtRoute("GetCharmType", new {id = charmTypeToAdd.Id},
+                    : CreatedAtRoute("GetCharmType", new { id = charmTypeToAdd.Id },
                         AutoMapper.Mapper.Map<CharmTypeDto>(charmTypeToAdd).GenerateLinks(_urlHelper));
             }
 
@@ -181,6 +276,26 @@ namespace ExaltedCharm.Api.Controllers
             }
 
             return NoContent();
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForCharmType(int id, string fields, bool includeCharms = false)
+        {
+            var links = new List<LinkDto>
+            {
+                string.IsNullOrWhiteSpace(fields)
+                    ? new LinkDto(_urlHelper.Link("GetCharmType", new {id = id, includeCharms = includeCharms}), "self", "GET")
+                    : new LinkDto(_urlHelper.Link("GetCharmType", new {id = id, includeCharms = includeCharms, fields = fields}), "self", "GET"),
+                new LinkDto(_urlHelper.Link("DeleteCharmType", new {id = id}), "delete_charmtype",
+                    "DELETE"),
+                new LinkDto(_urlHelper.Link("GetCharmsForCharmType", new {charmTypeId = id}), "get_charms", "GET"),
+                new LinkDto(_urlHelper.Link("UpdateCharmType", new {id = id}), "update_charmtype",
+                    "PUT"),
+                new LinkDto(_urlHelper.Link("PartiallyUpdateCharmType", new {id = id}),
+                    "partially_update_charmtype",
+                    "PATCH")
+            };
+
+            return links;
         }
     }
 }

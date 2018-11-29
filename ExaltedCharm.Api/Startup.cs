@@ -1,4 +1,5 @@
-﻿using ExaltedCharm.Api.Entities;
+﻿using System.Linq;
+using ExaltedCharm.Api.Entities;
 using ExaltedCharm.Api.Extensions;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
@@ -38,6 +39,8 @@ namespace ExaltedCharm.Api
                     o.OutputFormatters
                         .Add(new XmlDataContractSerializerOutputFormatter());
                     o.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
+                    var jsonOutputFormatter = o.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
+                    jsonOutputFormatter?.SupportedMediaTypes.Add("application/vnd.exalted.hateoas+json");
                 }).AddJsonOptions(options =>
                 {
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();

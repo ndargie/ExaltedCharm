@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using AutoMapper;
 using ExaltedCharm.Api.Entities;
 using ExaltedCharm.Api.Helpers;
@@ -9,7 +10,6 @@ using ExaltedCharm.Api.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SQLitePCL;
 
 namespace ExaltedCharm.Api.Controllers
 {
@@ -59,8 +59,9 @@ namespace ExaltedCharm.Api.Controllers
         }
 
         [HttpGet("{charmTypeId}/charms/{id}", Name = "GetCharm")]
-        public IActionResult GetCharm(int charmTypeId, int id)
+        public IActionResult GetCharm(int charmTypeId, int id, string fields)
         {
+
             if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))
             {
                 _logger.LogInformation($"Charmtype with id {charmTypeId} wasn't found when accessing charms");

@@ -23,9 +23,9 @@ namespace ExaltedCharm.Api.Controllers
         private readonly IPropertyMappingService _propertyMappingService;
         private readonly ITypeHelperService _typeHelperService;
 
-        public DurationController(IRepository repository, 
+        public DurationController(IRepository repository,
             ILogger<DurationController> logger,
-            IUrlHelper urlHelper, 
+            IUrlHelper urlHelper,
             IPropertyMappingService propertyMappingService,
             ITypeHelperService typeHelperService)
         {
@@ -37,7 +37,8 @@ namespace ExaltedCharm.Api.Controllers
         }
 
         [HttpGet(Name = "GetDurations")]
-        public IActionResult GetDurations(DurationResourceParameter durationResourceParameters)
+        public IActionResult GetDurations(DurationResourceParameter durationResourceParameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<Duration, DurationDto>
                 (durationResourceParameters.OrderBy))
@@ -50,7 +51,7 @@ namespace ExaltedCharm.Api.Controllers
             {
                 return BadRequest();
             }
-           
+
             var durations = _repository.GetAllOrderBy<Duration, DurationDto>(durationResourceParameters.OrderBy).AsQueryable();
             if (!string.IsNullOrWhiteSpace(durationResourceParameters.Name))
             {
@@ -67,20 +68,50 @@ namespace ExaltedCharm.Api.Controllers
                         "Name", durationResourceParameters.Name
                     }
                 };
-            var pageMetsaData =
-                durationResourceParameters.GeneratePagingMetaData(pagedList, "GetDurations", _urlHelper, filters);
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
-
-            return Ok( Mapper.Map<IEnumerable<DurationDto>>(pagedList).Select(x =>
+            if (mediaType == "application/vnd.exalted.hateoas+json")
             {
-                x = x.CreateLinksForDuration(_urlHelper);
-                return x;
-            }).ShapeData(durationResourceParameters.Fields));
+
+                var pageMetsaData =
+                    durationResourceParameters.GeneratePagingMetaData(pagedList, "GetDurations", _urlHelper);
+
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
+
+                var links = durationResourceParameters.GeneratePagingLinkData("GetDurations", pagedList.HasNext,
+                    pagedList.HasPrevious, _urlHelper, filters);
+                var shapedDuration = Mapper.Map<IEnumerable<DurationDto>>(pagedList).ShapeData(durationResourceParameters.Fields);
+
+                var shapedDurationWithLinks = shapedDuration.Select(duration =>
+                {
+                    var durationAsDictionary = duration as IDictionary<string, object>;
+                    var durationlinks =
+                        CreateLinksForDuration((int)durationAsDictionary["Id"], durationResourceParameters.Fields);
+                    durationAsDictionary.Add("links", durationlinks);
+                    return durationAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = shapedDurationWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
+            {
+                var pageMetsaData =
+                    durationResourceParameters.GeneratePagingMetaData(pagedList, "GetDurations", _urlHelper, filters,
+                        pagedList.HasNext, pagedList.HasPrevious);
+
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
+                return Ok(Mapper.Map<IEnumerable<DurationDto>>(durations).ShapeData(durationResourceParameters.Fields));
+            }
+
         }
 
         [HttpGet("{id}", Name = "GetDuration")]
-        public IActionResult GetDuration(int id, [FromQuery] string fields)
+        public IActionResult GetDuration(int id, [FromQuery] string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
 
             if (!_typeHelperService.
@@ -97,17 +128,21 @@ namespace ExaltedCharm.Api.Controllers
 
             var durationDto = Mapper.Map<DurationDto>(duration);
 
-            var links = CreateLinksForDuration(id, fields);
+            if (mediaType == "application/vnd.exalted.hateoas+json")
+            {
+                var links = CreateLinksForDuration(id, fields);
 
-            var linkedResourceToReturn = durationDto.ShapeData(fields) as IDictionary<string, object>;
+                var linkedResourceToReturn = durationDto.ShapeData(fields) as IDictionary<string, object>;
 
-            linkedResourceToReturn.Add("links", links);
+                linkedResourceToReturn.Add("links", links);
 
-            return Ok();
+                return Ok(linkedResourceToReturn);
+            }
+            return Ok(durationDto.ShapeData(fields));
         }
 
         [HttpGet("{id}/Charms", Name = "GetCharmsForDuration")]
-        public IActionResult GetCharmsForDuration(int id)
+        public IActionResult GetCharmsForDuration(int id, [FromHeader(Name = "Accept")] string mediaType)
         {
             var duration = _repository.GetAll<Duration>()
                 .Include(x => x.Charms)
@@ -117,16 +152,22 @@ namespace ExaltedCharm.Api.Controllers
                 return NotFound();
             }
 
-            var charms = Mapper.Map<IEnumerable<CharmDto>>(duration.Charms).Select(x =>
+            if (mediaType == "application/vnd.exalted.hateoas+json")
             {
-                return x = x.GenerateLinks(_urlHelper);
-            });
-            var wrapper = new LinkedCollectionResourceWrapperDto<CharmDto>(charms);
-            return Ok(wrapper.CreateDurationLinksForCharms(_urlHelper));
+                var charms = Mapper.Map<IEnumerable<CharmDto>>(duration.Charms).Select(x =>
+                {
+                    return x = x.GenerateLinks(_urlHelper);
+                });
+                var wrapper = new LinkedCollectionResourceWrapperDto<CharmDto>(charms);
+                return Ok(wrapper.CreateDurationLinksForCharms(_urlHelper));
+            }
+
+            return Ok(Mapper.Map<IEnumerable<CharmDto>>(duration.Charms));
         }
 
         [HttpPost]
-        public IActionResult CreateDuration([FromBody] SaveDurationDto duration)
+        public IActionResult CreateDuration([FromBody] SaveDurationDto duration,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
 
             if (duration == null)
@@ -141,10 +182,12 @@ namespace ExaltedCharm.Api.Controllers
 
             var durationEntity = Mapper.Map<Duration>(duration);
             _repository.Create(durationEntity);
-            return !_repository.Save() ?
-                StatusCode(500, "A problem happened while handling your request.") :
-                CreatedAtRoute("GetDuration", new { id = durationEntity.Id }, 
-                    Mapper.Map<DurationDto>(durationEntity).CreateLinksForDuration(_urlHelper));
+            return !_repository.Save()
+                ? StatusCode(500, "A problem happened while handling your request.")
+                : CreatedAtRoute("GetDuration", new {id = durationEntity.Id},
+                    mediaType == "application/vnd.exalted.hateoas+json"
+                        ? Mapper.Map<DurationDto>(durationEntity).CreateLinksForDuration(_urlHelper)
+                        : Mapper.Map<DurationDto>(durationEntity));
         }
 
         [HttpPost("{id}")]
@@ -187,7 +230,8 @@ namespace ExaltedCharm.Api.Controllers
 
         [HttpPatch("{id}", Name = "PartiallyUpdateDuration")]
         public IActionResult PartiallyUpdateDuration(int id,
-            [FromBody] JsonPatchDocument<DurationForUpdate> patchDoc)
+            [FromBody] JsonPatchDocument<DurationForUpdate> patchDoc,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             if (patchDoc == null)
             {
@@ -205,15 +249,17 @@ namespace ExaltedCharm.Api.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    return  new UnprocessableEntityObjectResult(ModelState);
+                    return new UnprocessableEntityObjectResult(ModelState);
                 }
 
                 var durationToAdd = Mapper.Map<Duration>(durationDto);
                 durationToAdd.Id = id;
                 return !_repository.Save()
                     ? StatusCode(500, "A problem happened while handling your request.")
-                    : CreatedAtRoute("GetDuration", new { id = durationToAdd.Id },
-                        AutoMapper.Mapper.Map<DurationDto>(durationToAdd));
+                    : CreatedAtRoute("GetDuration", new {id = durationToAdd.Id},
+                        mediaType == "application/vnd.exalted.hateoas+json"
+                            ? Mapper.Map<DurationDto>(durationToAdd).CreateLinksForDuration(_urlHelper)
+                            : Mapper.Map<DurationDto>(durationToAdd));
             }
 
             var durationToPatch = Mapper.Map<DurationForUpdate>(duration);
@@ -280,9 +326,6 @@ namespace ExaltedCharm.Api.Controllers
             };
 
             return links;
-
         }
-
-       
     }
 }

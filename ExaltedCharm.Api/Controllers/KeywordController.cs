@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using ExaltedCharm.Api.Entities;
 using ExaltedCharm.Api.Helpers;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace ExaltedCharm.Api.Controllers
 {
@@ -14,40 +16,127 @@ namespace ExaltedCharm.Api.Controllers
     {
         private readonly IRepository _repository;
         private readonly IUrlHelper _urlHelper;
+        private readonly IPropertyMappingService _propertyMappingService;
+        private readonly ITypeHelperService _typeHelperService;
 
-        public KeywordController(IRepository repository, IUrlHelper urlHelper)
+        public KeywordController(IRepository repository, IUrlHelper urlHelper,
+            IPropertyMappingService propertyMappingService,
+            ITypeHelperService typeHelperService)
         {
             _repository = repository;
             _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
-        [HttpGet]
-        public IActionResult GetKeywords()
+        [HttpGet(Name = "GetKeywords")]
+        public IActionResult GetKeywords(KeywordResourceParameter keywordResourceParameter, [FromHeader(Name = "Accept")] string mediaType)
         {
-            var keywords = _repository.GetAll<Keyword>().ToList();
-            var keywordDtos = AutoMapper.Mapper.Map<IEnumerable<KeywordDto>>(keywords).Select(x =>
+            if (!_propertyMappingService.ValidMappingExistsFor<Keyword, KeywordDto>
+                (keywordResourceParameter.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<KeywordDto>(keywordResourceParameter.Fields))
+            {
+                return BadRequest();
+            }
+
+            var keywords = _repository
+                .GetAllOrderBy<Keyword, KeywordDto>(keywordResourceParameter.OrderBy)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keywordResourceParameter.Name))
+            {
+                var whereClause = keywordResourceParameter.Name.Trim().ToLowerInvariant();
+                keywords = keywords.Where(x => x.Name.ToLowerInvariant() == whereClause);
+            }
+
+            var pagedList = PagedList<Keyword>.Create(keywords, keywordResourceParameter.PageNumber,
+                keywordResourceParameter.PageSize);
+
+            var filters = string.IsNullOrWhiteSpace(keywordResourceParameter.Name)
+                ? new Dictionary<string, string>()
+                : new Dictionary<string, string>()
                 {
-                    x = x.GenerateLinks(_urlHelper);
-                    return x;
+                    {
+                        "Name", keywordResourceParameter.Name
+                    }
+                };
+
+            if (mediaType == "application/vnd.exalted.hateoas+json")
+            {
+                var pageMetsaData =
+                    keywordResourceParameter.GeneratePagingMetaData(pagedList, "GetKeywords", _urlHelper);
+
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
+
+                var links = keywordResourceParameter.GeneratePagingLinkData("GetKeywords", pagedList.HasNext,
+                    pagedList.HasPrevious, _urlHelper, filters);
+                var shapedKeyword = Mapper.Map<IEnumerable<KeywordDto>>(pagedList).ShapeData(keywordResourceParameter.Fields);
+
+                var shapedKeywordsWithLinks = shapedKeyword.Select(keyword =>
+                {
+                    var keywordAsDictionary = keyword as IDictionary<string, object>;
+                    var keywordLink =
+                        CreateLinksForKeyword((int)keywordAsDictionary["Id"], keywordResourceParameter.Fields);
+                    keywordAsDictionary.Add("links", keywordLink);
+                    return keywordAsDictionary;
                 });
-            return Ok(keywordDtos);
+
+                var linkedCollectionResource = new
+                {
+                    value = shapedKeywordsWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
+            {
+                var pageMetsaData =
+                    keywordResourceParameter.GeneratePagingMetaData(pagedList, "GetKeywords", _urlHelper, filters,
+                        pagedList.HasNext, pagedList.HasPrevious);
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
+                return Ok(Mapper.Map<IEnumerable<KeywordDto>>(keywords).ShapeData(keywordResourceParameter.Fields));
+            }
         }
 
         [HttpGet("{id}", Name = "GetKeyword")]
-        public IActionResult GetKeyword(int id)
+        public IActionResult GetKeyword(int id,
+            [FromQuery]string fields, 
+            [FromHeader(Name = "Accept")] string mediaType)
         {
+
+            if (!_typeHelperService.
+                TypeHasProperties<KeywordDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var keyword = _repository.GetFirst<Keyword>(x => x.Id == id);
             if (keyword == null)
             {
                 return NotFound();
             }
 
-            var keywordDto = AutoMapper.Mapper.Map<KeywordDto>(keyword).GenerateLinks(_urlHelper);
-            return Ok(keywordDto);
+            if (mediaType == "application/vnd.exalted.hateoas+json")
+            {
+                var links = CreateLinksForKeyword(id, fields);
+
+                var linkedResourceToReturn = keyword.ShapeData(fields) as IDictionary<string, object>;
+
+                linkedResourceToReturn.Add("links", links);
+
+                return Ok(linkedResourceToReturn);
+            }
+
+            return Ok(Mapper.Map<KeywordDto>(keyword).ShapeData(fields));
         }
 
         [HttpPost(Name = "CreateKeyword")]
-        public IActionResult CreateKeyword([FromBody] KeywordCreationDto keyword)
+        public IActionResult CreateKeyword([FromBody] KeywordCreationDto keyword, [FromHeader(Name = "Accept")] string mediaType)
         {
             if (keyword == null)
             {
@@ -58,7 +147,7 @@ namespace ExaltedCharm.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var finalKeyword = AutoMapper.Mapper.Map<Keyword>(keyword);
+            var finalKeyword = Mapper.Map<Keyword>(keyword);
 
             _repository.Create(finalKeyword);
             if (!_repository.Save())
@@ -67,7 +156,9 @@ namespace ExaltedCharm.Api.Controllers
             }
 
             return CreatedAtRoute("GetKeyword", new {id = finalKeyword.Id},
-                AutoMapper.Mapper.Map<KeywordDto>(finalKeyword).GenerateLinks(_urlHelper));
+                mediaType == "application/vnd.exalted.hateoas+json"
+                    ? Mapper.Map<KeywordDto>(finalKeyword).GenerateLinks(_urlHelper)
+                    : Mapper.Map<KeywordDto>(finalKeyword));
         }
 
         [HttpPut("{id}", Name = "UpdateKeyword")]
@@ -89,7 +180,7 @@ namespace ExaltedCharm.Api.Controllers
             }
 
             var keywordEntity = _repository.GetFirst<Keyword>(x => x.Id == id);
-            AutoMapper.Mapper.Map(keyword, keywordEntity);
+            Mapper.Map(keyword, keywordEntity);
             _repository.Update(keywordEntity);
             if (!_repository.Save())
             {
@@ -154,6 +245,25 @@ namespace ExaltedCharm.Api.Controllers
             }
 
             return NoContent();
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForKeyword(int id, string fields)
+        {
+            var links = new List<LinkDto>
+            {
+                string.IsNullOrWhiteSpace(fields)
+                    ? new LinkDto(_urlHelper.Link("GetKeyword", new {id = id}), "self", "GET")
+                    : new LinkDto(_urlHelper.Link("GetKeyword", new {id = id, fields = fields}), "self", "GET"),
+                new LinkDto(_urlHelper.Link("DeleteKeyword", new {id = id}), "delete_keyword",
+                    "DELETE"),
+                new LinkDto(_urlHelper.Link("UpdateKeyword", new {id = id}), "update_keyword",
+                    "PUT"),
+                new LinkDto(_urlHelper.Link("PartiallyUpdateKeyword", new {id = id}),
+                    "partially_update_keyword",
+                    "PATCH")
+            };
+
+            return links;
         }
     }
 }

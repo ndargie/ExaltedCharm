@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ExaltedCharm.Api.Entities;
 using ExaltedCharm.Api.Models;
+using ExaltedCharm.Api.PropertyMappings;
 
 namespace ExaltedCharm.Api.Services
 {
@@ -13,14 +14,18 @@ namespace ExaltedCharm.Api.Services
         public PropertyMappingService()
         {
             _propertyMappings.Add(new PropertyMapping<Duration, DurationDto>(_durationPropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<Keyword, KeywordDto>(_keywordPropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<CharmType, CharmTypeDto>(_charmTypePropertyMapping));
         }
 
-        private readonly Dictionary<string, PropertyMappingValue> _durationPropertyMapping = new Dictionary<string, PropertyMappingValue>()
-        {
-            { "Id", new PropertyMappingValue(new List<string>() { "Id" }) },
-            { "Name", new PropertyMappingValue(new List<string>() { "Name" }) },
-            { "Description", new PropertyMappingValue(new List<string>() { "Description" }) },
-        };
+        private readonly Dictionary<string, PropertyMappingValue> _durationPropertyMapping =
+            DurationMappings.DurationToDurationDto();
+
+        private readonly Dictionary<string, PropertyMappingValue> _keywordPropertyMapping =
+            KeywordMappings.KeywordToKeywordDto();
+
+        private readonly Dictionary<string, PropertyMappingValue> _charmTypePropertyMapping =
+            CharmTypeMappings.CharmTypeToCharmTypeDto();
 
         public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
         {

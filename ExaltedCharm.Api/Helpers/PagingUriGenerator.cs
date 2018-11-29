@@ -34,6 +34,7 @@ namespace ExaltedCharm.Api.Helpers
                         orderBy = resourceParameters.OrderBy,
                         fields = resourceParameters.Fields
                     });
+                case ResourceUriType.Current:
                 default:
                     return urlHelper.Link(methodName, new
                     {
