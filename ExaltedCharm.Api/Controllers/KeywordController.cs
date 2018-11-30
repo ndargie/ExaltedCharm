@@ -99,7 +99,7 @@ namespace ExaltedCharm.Api.Controllers
                     keywordResourceParameter.GeneratePagingMetaData(pagedList, "GetKeywords", _urlHelper, filters,
                         pagedList.HasNext, pagedList.HasPrevious);
                 Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
-                return Ok(Mapper.Map<IEnumerable<KeywordDto>>(keywords).ShapeData(keywordResourceParameter.Fields));
+                return Ok(Mapper.Map<IEnumerable<KeywordDto>>(pagedList).ShapeData(keywordResourceParameter.Fields));
             }
         }
 

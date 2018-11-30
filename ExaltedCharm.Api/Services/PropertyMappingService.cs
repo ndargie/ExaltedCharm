@@ -16,6 +16,7 @@ namespace ExaltedCharm.Api.Services
             _propertyMappings.Add(new PropertyMapping<Duration, DurationDto>(_durationPropertyMapping));
             _propertyMappings.Add(new PropertyMapping<Keyword, KeywordDto>(_keywordPropertyMapping));
             _propertyMappings.Add(new PropertyMapping<CharmType, CharmTypeDto>(_charmTypePropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<Charm, CharmDto>(_charmPropertyMapping));
         }
 
         private readonly Dictionary<string, PropertyMappingValue> _durationPropertyMapping =
@@ -26,6 +27,9 @@ namespace ExaltedCharm.Api.Services
 
         private readonly Dictionary<string, PropertyMappingValue> _charmTypePropertyMapping =
             CharmTypeMappings.CharmTypeToCharmTypeDto();
+
+        private readonly Dictionary<string, PropertyMappingValue>
+            _charmPropertyMapping = CharmMapping.CharmToCharmDto();
 
         public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
         {

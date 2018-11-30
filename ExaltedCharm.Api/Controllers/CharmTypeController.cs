@@ -101,7 +101,7 @@ namespace ExaltedCharm.Api.Controllers
                     charmTypeResourceParameter.GeneratePagingMetaData(pagedList, "GetCharmTypes", _urlHelper, filters,
                         pagedList.HasNext, pagedList.HasPrevious);
                 Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
-                return Ok(Mapper.Map<IEnumerable<CharmTypeDto>>(charmTypes).ShapeData(charmTypeResourceParameter.Fields));
+                return Ok(Mapper.Map<IEnumerable<CharmTypeDto>>(pagedList).ShapeData(charmTypeResourceParameter.Fields));
             }
         }
 

@@ -104,7 +104,7 @@ namespace ExaltedCharm.Api.Controllers
                         pagedList.HasNext, pagedList.HasPrevious);
 
                 Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
-                return Ok(Mapper.Map<IEnumerable<DurationDto>>(durations).ShapeData(durationResourceParameters.Fields));
+                return Ok(Mapper.Map<IEnumerable<DurationDto>>(pagedList).ShapeData(durationResourceParameters.Fields));
             }
 
         }
