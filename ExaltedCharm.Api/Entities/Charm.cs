@@ -16,6 +16,9 @@ namespace ExaltedCharm.Api.Entities
         [ForeignKey("CharmTypeId")]
         public CharmType CharmType { get; set; }
         public int CharmTypeId { get; set; }
+        [ForeignKey("AbilityId")]
+        public Ability Ability { get; set; }
+        public int? AbilityId { get; set; }
         public int MoteCost { get; set; }
         public int WillpowerCost { get; set; }
         public int HealthCost { get; set; }
@@ -27,7 +30,6 @@ namespace ExaltedCharm.Api.Entities
         [ForeignKey("DurationId")]
         public Duration Duration { get; set; }
         public int DurationId { get; set; }
-
         public void AddKeyword(Keyword keyword)
         {
             if (Keywords.All(x => x.KeywordId != keyword.Id))

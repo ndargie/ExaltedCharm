@@ -31,6 +31,9 @@ namespace ExaltedCharm.Api.Services
         private readonly Dictionary<string, PropertyMappingValue>
             _charmPropertyMapping = CharmMapping.CharmToCharmDto();
 
+        private readonly Dictionary<string, PropertyMappingValue> _exaltedTypePropertyMappin =
+            ExaltedTypeMappings.ExaltedTypeToExaltedTypeDto();
+
         public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
         {
             var matchingMapping = _propertyMappings.OfType<PropertyMapping<TSource, TDestination>>().ToList();

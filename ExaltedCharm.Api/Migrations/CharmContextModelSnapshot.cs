@@ -20,10 +20,89 @@ namespace ExaltedCharm.Api.Migrations
                 .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("ExaltedCharm.Api.Entities.Ability", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(200);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(200);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Skills");
+                });
+
+            modelBuilder.Entity("ExaltedCharm.Api.Entities.Caste", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(200);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200);
+
+                    b.Property<int>("ExaltedTypeId");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(200);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExaltedTypeId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Castes");
+                });
+
+            modelBuilder.Entity("ExaltedCharm.Api.Entities.CasteAbility", b =>
+                {
+                    b.Property<int>("CasteId");
+
+                    b.Property<int>("AbilityId");
+
+                    b.HasKey("CasteId", "AbilityId");
+
+                    b.HasIndex("AbilityId");
+
+                    b.ToTable("CasteAbilities");
+                });
+
             modelBuilder.Entity("ExaltedCharm.Api.Entities.Charm", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("AbilityId");
 
                     b.Property<int>("CharmTypeId");
 
@@ -57,6 +136,8 @@ namespace ExaltedCharm.Api.Migrations
                     b.Property<int>("WillpowerCost");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AbilityId");
 
                     b.HasIndex("CharmTypeId");
 
@@ -140,24 +221,28 @@ namespace ExaltedCharm.Api.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("Description");
+                    b.Property<string>("Description")
+                        .HasMaxLength(200);
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(200);
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40);
 
-                    b.Property<string>("NecromancyLimit");
+                    b.Property<string>("NecromancyLimit")
+                        .HasMaxLength(100);
 
-                    b.Property<string>("SorceryLimit");
+                    b.Property<string>("SorceryLimit")
+                        .HasMaxLength(100);
 
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("ExaltedTypes");
                 });
@@ -202,8 +287,33 @@ namespace ExaltedCharm.Api.Migrations
                     b.ToTable("KeywordCharms");
                 });
 
+            modelBuilder.Entity("ExaltedCharm.Api.Entities.Caste", b =>
+                {
+                    b.HasOne("ExaltedCharm.Api.Entities.ExaltedType", "ExaltedType")
+                        .WithMany("Castes")
+                        .HasForeignKey("ExaltedTypeId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("ExaltedCharm.Api.Entities.CasteAbility", b =>
+                {
+                    b.HasOne("ExaltedCharm.Api.Entities.Ability", "Ability")
+                        .WithMany("Castes")
+                        .HasForeignKey("AbilityId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("ExaltedCharm.Api.Entities.Caste", "Caste")
+                        .WithMany("Abilities")
+                        .HasForeignKey("CasteId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("ExaltedCharm.Api.Entities.Charm", b =>
                 {
+                    b.HasOne("ExaltedCharm.Api.Entities.Ability", "Ability")
+                        .WithMany("Charms")
+                        .HasForeignKey("AbilityId");
+
                     b.HasOne("ExaltedCharm.Api.Entities.CharmType", "CharmType")
                         .WithMany("Charms")
                         .HasForeignKey("CharmTypeId")
@@ -215,7 +325,7 @@ namespace ExaltedCharm.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ExaltedCharm.Api.Entities.ExaltedType", "ExaltedType")
-                        .WithMany("Charms")
+                        .WithMany()
                         .HasForeignKey("ExaltedTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

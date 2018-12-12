@@ -110,7 +110,7 @@ namespace ExaltedCharm.Api.Controllers
         {
 
             if (!_typeHelperService.
-                TypeHasProperties<KeywordDto>(fields))
+                TypeHasProperties<CharmTypeDto>(fields))
             {
                 return BadRequest();
             }

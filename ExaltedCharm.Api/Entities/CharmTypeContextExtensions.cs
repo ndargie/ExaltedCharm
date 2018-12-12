@@ -27,17 +27,443 @@ namespace ExaltedCharm.Api.Entities
                             CreatedDate = DateTime.Now,
                             NecromancyLimit = NecromancyLevels.Shadowlands.ToString(),
                             SorceryLimit = SorceryLevels.Solar.ToString()
-                        },
-                        new ExaltedType()
-                        {
-                            Name = "Abyssal",
-                            Description = "Servants of the Deathlords",
-                            CreatedDate = DateTime.Now,
-                            NecromancyLimit = NecromancyLevels.Void.ToString(),
-                            SorceryLimit = SorceryLevels.Celestial.ToString()
                         }
                     };
                 context.ExaltedTypes.AddRange(exaltedTypes);
+                context.SaveChanges();
+
+                var castes = new List<Caste>()
+                {
+                    new Caste()
+                    {
+                        Name = "Dawn",
+                        Description = "Warriors of the unconquered sun",
+                        CreatedDate = DateTime.Now
+
+                    },
+                    new Caste()
+                    {
+                        Name = "Night",
+                        Description = "Assasins, theives and spys of the unconquered sun",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Caste()
+                    {
+                        Name = "Twilight",
+                        Description = "Scholars and artisans of the unconquered sun",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Caste()
+                    {
+                        Name = "Eclipse",
+                        Description = "Diplomats of the unconquered sun",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Caste()
+                    {
+                        Name = "Zenith",
+                        Description = "Priest of the unconquered sun",
+                        CreatedDate = DateTime.Now
+                    }
+                };
+
+                context.Castes.AddRange(castes);
+
+                context.SaveChanges();
+
+                var abilities = new List<Ability>()
+                {
+                    new Ability()
+                    {
+                        Name = "Archery",
+                        Description = "Knowledge of ranged weapons",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Athletics",
+                        Description = "Physical movement",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Awareness",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Brawl",
+                        Description = "Unarmed combat",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Bureaucracy",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Craft",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Dodge",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Integrity",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Larcency",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Linguistics",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Lore",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Martial Arts",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Melee",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Medicine",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Occult",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Performance",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Presence",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Resistance",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Ride",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Sail",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Socialize",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Stealth",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Survival",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Thrown",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "War",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    }
+                };
+
+                context.Abilities.AddRange(abilities);
+                context.SaveChanges();
+
+                var dawnCaste = castes.Single(x => x.Name == "Dawn");
+
+                var dawnSkills = new List<CasteAbility>()
+                {
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Archery"),
+                        Caste = dawnCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Awareness"),
+                        Caste = dawnCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Brawl"),
+                        Caste = dawnCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Martial Arts"),
+                        Caste = dawnCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Dodge"),
+                        Caste = dawnCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Melee"), 
+                        Caste = dawnCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Resistance"),
+                        Caste = dawnCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Thrown"),
+                        Caste = dawnCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "War"),
+                        Caste = dawnCaste
+                    }
+                };
+
+                var zenithCaste = castes.Single(x => x.Name == "Zenith");
+                var zenithSkills = new List< CasteAbility>()
+                {
+                    new CasteAbility()
+                    {
+                        Ability = abilities.SingleOrDefault(x => x.Name == "Athletics"),
+                        Caste = zenithCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.SingleOrDefault(x => x.Name == "Integrity"),
+                        Caste = zenithCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.SingleOrDefault(x => x.Name == "Performance"),
+                        Caste = zenithCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.SingleOrDefault(x => x.Name == "Lore"),
+                        Caste = zenithCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.SingleOrDefault(x => x.Name == "Presence"),
+                        Caste = zenithCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.SingleOrDefault(x => x.Name == "Resistance"),
+                        Caste = zenithCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.SingleOrDefault(x => x.Name == "Survival"),
+                        Caste = zenithCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.SingleOrDefault(x => x.Name == "War"),
+                        Caste = zenithCaste
+                    },
+                };
+
+                var twilightCaste = castes.Single(x => x.Name == "Twilight");
+                var twilightSkills = new List<CasteAbility>()
+                {
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Bureaucracy"),
+                        Caste = twilightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Craft"),
+                        Caste = twilightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Integrity"),
+                        Caste = twilightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Investigation"),
+                        Caste = twilightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Linguistics"),
+                        Caste = twilightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Lore"),
+                        Caste = twilightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Medicine"),
+                        Caste = twilightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Occult"),
+                        Caste = twilightCaste
+                    }
+                };
+
+                var nightCaste = castes.Single(x => x.Name == "Night");
+                var nightSkills = new List<CasteAbility>()
+                {
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Athletics"),
+                        Caste = nightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Awareness"),
+                        Caste = nightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Dodge"),
+                        Caste = nightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Investigation"),
+                        Caste = nightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Larceny"),
+                        Caste = nightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Ride"),
+                        Caste = nightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Stealth"),
+                        Caste = nightCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Socialize"),
+                        Caste = nightCaste
+                    }
+                };
+
+                var eclipseCaste = castes.Single(x => x.Name == "Eclipse");
+                var eclipseSkills = new List<CasteAbility>()
+                {
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Bureacracy"),
+                        Caste = eclipseCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Larceny"),
+                        Caste = eclipseCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Linguistics"),
+                        Caste = eclipseCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Occult"),
+                        Caste = eclipseCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Presence"),
+                        Caste = eclipseCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Ride"),
+                        Caste = eclipseCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Sail"),
+                        Caste = eclipseCaste
+                    },
+                    new CasteAbility()
+                    {
+                        Ability = abilities.Single(x => x.Name == "Socialize"),
+                        Caste = eclipseCaste
+                    }
+                };
+
+                context.CasteAbilities.AddRange(dawnSkills);
+                context.CasteAbilities.AddRange(zenithSkills);
+                context.CasteAbilities.AddRange(twilightSkills);
+                context.CasteAbilities.AddRange(nightSkills);
+                context.CasteAbilities.AddRange(eclipseSkills);
                 context.SaveChanges();
 
                 var durations = new List<Duration>()
@@ -48,6 +474,12 @@ namespace ExaltedCharm.Api.Entities
                             Description = "Instantly take effect",
                             CreatedDate = DateTime.Now
 
+                        },
+                        new Duration()
+                        {
+                            Name = "One tick",
+                            Description = "Last one combat tick",
+                            CreatedDate = DateTime.Now
                         },
                         new Duration()
                         {
@@ -96,7 +528,114 @@ namespace ExaltedCharm.Api.Entities
                             Name = "Combo-Basic",
                             Description = "To be added",
                             CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Uniform",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Decisive-only",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Withering-only",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Dual",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Clash",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Perilous",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Counterattack",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Stackable",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Mute",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Psyche",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Salient",
+                            Description = "",
+                        },
+                        new Keyword()
+                        {
+                            Name = "Bridge",
+                            Description = "",
+                        },
+                        new Keyword()
+                        {
+                            Name = "Written-only",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Mastery",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Form",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Terrestrial",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Aggravated",
+                            Description = "",
+                            CreatedDate = DateTime.Now
+                        },
+                        new Keyword()
+                        {
+                            Name = "Apocryphal",
+                            Description = "",
+                            CreatedDate = DateTime.Now
                         }
+                        
                     };
                 context.Keywords.AddRange(keywords);
                 context.SaveChanges();

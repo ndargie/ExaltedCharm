@@ -53,12 +53,12 @@ namespace ExaltedCharm.Api.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     CreatedBy = table.Column<string>(maxLength: 200, nullable: true),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(maxLength: 200, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 200, nullable: true),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    NecromancyLimit = table.Column<string>(nullable: true),
-                    SorceryLimit = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(maxLength: 40, nullable: false),
+                    NecromancyLimit = table.Column<string>(maxLength: 100, nullable: true),
+                    SorceryLimit = table.Column<string>(maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -84,11 +84,55 @@ namespace ExaltedCharm.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Skills",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    CreatedBy = table.Column<string>(maxLength: 200, nullable: true),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    Description = table.Column<string>(maxLength: 200, nullable: true),
+                    ModifiedBy = table.Column<string>(maxLength: 200, nullable: true),
+                    ModifiedDate = table.Column<DateTime>(nullable: true),
+                    Name = table.Column<string>(maxLength: 40, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Skills", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Castes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    CreatedBy = table.Column<string>(maxLength: 200, nullable: true),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    Description = table.Column<string>(maxLength: 200, nullable: true),
+                    ExaltedTypeId = table.Column<int>(nullable: false),
+                    ModifiedBy = table.Column<string>(maxLength: 200, nullable: true),
+                    ModifiedDate = table.Column<DateTime>(nullable: true),
+                    Name = table.Column<string>(maxLength: 40, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Castes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Castes_ExaltedTypes_ExaltedTypeId",
+                        column: x => x.ExaltedTypeId,
+                        principalTable: "ExaltedTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Charms",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    AbilityId = table.Column<int>(nullable: true),
                     CharmTypeId = table.Column<int>(nullable: false),
                     CreatedBy = table.Column<string>(maxLength: 200, nullable: true),
                     CreatedDate = table.Column<DateTime>(nullable: false),
@@ -107,6 +151,12 @@ namespace ExaltedCharm.Api.Migrations
                 {
                     table.PrimaryKey("PK_Charms", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Charms_Skills_AbilityId",
+                        column: x => x.AbilityId,
+                        principalTable: "Skills",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Charms_CharmTypes_CharmTypeId",
                         column: x => x.CharmTypeId,
                         principalTable: "CharmTypes",
@@ -122,6 +172,30 @@ namespace ExaltedCharm.Api.Migrations
                         name: "FK_Charms_ExaltedTypes_ExaltedTypeId",
                         column: x => x.ExaltedTypeId,
                         principalTable: "ExaltedTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CasteAbilities",
+                columns: table => new
+                {
+                    CasteId = table.Column<int>(nullable: false),
+                    AbilityId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CasteAbilities", x => new { x.CasteId, x.AbilityId });
+                    table.ForeignKey(
+                        name: "FK_CasteAbilities_Skills_AbilityId",
+                        column: x => x.AbilityId,
+                        principalTable: "Skills",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CasteAbilities_Castes_CasteId",
+                        column: x => x.CasteId,
+                        principalTable: "Castes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -151,6 +225,27 @@ namespace ExaltedCharm.Api.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_CasteAbilities_AbilityId",
+                table: "CasteAbilities",
+                column: "AbilityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Castes_ExaltedTypeId",
+                table: "Castes",
+                column: "ExaltedTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Castes_Name",
+                table: "Castes",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Charms_AbilityId",
+                table: "Charms",
+                column: "AbilityId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Charms_CharmTypeId",
                 table: "Charms",
                 column: "CharmTypeId");
@@ -166,21 +261,60 @@ namespace ExaltedCharm.Api.Migrations
                 column: "ExaltedTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Charms_Name",
+                table: "Charms",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CharmTypes_Name",
+                table: "CharmTypes",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Durations_Name",
+                table: "Durations",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExaltedTypes_Name",
+                table: "ExaltedTypes",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_KeywordCharms_KeywordId",
                 table: "KeywordCharms",
                 column: "KeywordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Skills_Name",
+                table: "Skills",
+                column: "Name",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "CasteAbilities");
+
+            migrationBuilder.DropTable(
                 name: "KeywordCharms");
+
+            migrationBuilder.DropTable(
+                name: "Castes");
 
             migrationBuilder.DropTable(
                 name: "Charms");
 
             migrationBuilder.DropTable(
                 name: "Keywords");
+
+            migrationBuilder.DropTable(
+                name: "Skills");
 
             migrationBuilder.DropTable(
                 name: "CharmTypes");

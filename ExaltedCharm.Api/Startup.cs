@@ -99,7 +99,7 @@ namespace ExaltedCharm.Api
                 });
             }
 
-            charmTypeContext.EnsureSeedDataForContext();
+            //charmTypeContext.EnsureSeedDataForContext();
 
             app.UseStatusCodePages();
             AutoMapper.Mapper.Initialize(cfg =>
@@ -119,6 +119,8 @@ namespace ExaltedCharm.Api
                     cfg.CreateMap<Models.SaveDurationDto, Entities.Duration>();
                     cfg.CreateMap<Models.DurationForUpdate, Entities.Duration>();
                     cfg.CreateMap<Entities.Duration, Models.DurationForUpdate>();
+                    cfg.CreateMap<Entities.ExaltedType, Models.ExaltedTypeDto>();
+                    cfg.CreateMap<Entities.Caste, Models.CasteDto>();
                 });
             app.UseMvc(config =>
             {
