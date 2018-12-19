@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace ExaltedCharm.Api.Controllers
 {
-    [Route("api/charmTypes")]
+    [Route("api/exaltedTypes")]
     public class ExaltedTypeController : Controller
     {
         private readonly IRepository _repository;
@@ -106,7 +106,7 @@ namespace ExaltedCharm.Api.Controllers
             }
         }
 
-        [HttpGet(Name = "GetExaltedType")]
+        [HttpGet("{id}", Name = "GetExaltedType")]
         public IActionResult GetExaltedType(int id, string fields, [FromHeader(Name = "Accept")] string mediaType, bool includeCastes = false)
         {
 

@@ -38,32 +38,37 @@ namespace ExaltedCharm.Api.Entities
                     {
                         Name = "Dawn",
                         Description = "Warriors of the unconquered sun",
-                        CreatedDate = DateTime.Now
+                        CreatedDate = DateTime.Now,
+                        ExaltedType = exaltedTypes.First()
 
                     },
                     new Caste()
                     {
                         Name = "Night",
                         Description = "Assasins, theives and spys of the unconquered sun",
-                        CreatedDate = DateTime.Now
+                        CreatedDate = DateTime.Now,
+                        ExaltedType = exaltedTypes.First()
                     },
                     new Caste()
                     {
                         Name = "Twilight",
                         Description = "Scholars and artisans of the unconquered sun",
-                        CreatedDate = DateTime.Now
+                        CreatedDate = DateTime.Now,
+                        ExaltedType = exaltedTypes.First()
                     },
                     new Caste()
                     {
                         Name = "Eclipse",
                         Description = "Diplomats of the unconquered sun",
-                        CreatedDate = DateTime.Now
+                        CreatedDate = DateTime.Now,
+                        ExaltedType = exaltedTypes.First()
                     },
                     new Caste()
                     {
                         Name = "Zenith",
                         Description = "Priest of the unconquered sun",
-                        CreatedDate = DateTime.Now
+                        CreatedDate = DateTime.Now,
+                        ExaltedType = exaltedTypes.First()
                     }
                 };
 
@@ -118,6 +123,12 @@ namespace ExaltedCharm.Api.Entities
                     new Ability()
                     {
                         Name = "Integrity",
+                        Description = "",
+                        CreatedDate = DateTime.Now
+                    },
+                    new Ability()
+                    {
+                        Name = "Investigation",
                         Description = "",
                         CreatedDate = DateTime.Now
                     },
@@ -394,7 +405,7 @@ namespace ExaltedCharm.Api.Entities
                     },
                     new CasteAbility()
                     {
-                        Ability = abilities.Single(x => x.Name == "Larceny"),
+                        Ability = abilities.Single(x => x.Name == "Larcency"),
                         Caste = nightCaste
                     },
                     new CasteAbility()
@@ -419,12 +430,12 @@ namespace ExaltedCharm.Api.Entities
                 {
                     new CasteAbility()
                     {
-                        Ability = abilities.Single(x => x.Name == "Bureacracy"),
+                        Ability = abilities.Single(x => x.Name == "Bureaucracy"),
                         Caste = eclipseCaste
                     },
                     new CasteAbility()
                     {
-                        Ability = abilities.Single(x => x.Name == "Larceny"),
+                        Ability = abilities.Single(x => x.Name == "Larcency"),
                         Caste = eclipseCaste
                     },
                     new CasteAbility()

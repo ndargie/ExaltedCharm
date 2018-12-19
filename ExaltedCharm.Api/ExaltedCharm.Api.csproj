@@ -9,6 +9,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Controllers\CasteController.cs" />
+    <Content Include="Controllers\CharmCollectionsController.cs" />
+    <Content Include="Controllers\CharmController.cs" />
+    <Content Include="Controllers\CharmTypeController.cs" />
+    <Content Include="Controllers\DurationController.cs" />
+    <Content Include="Controllers\ExaltedTypeController.cs" />
+    <Content Include="Controllers\KeywordController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Exceptions\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>

@@ -131,7 +131,7 @@ namespace ExaltedCharm.Api.Controllers
         public IActionResult GetCharm(int charmTypeId, int id, string fields, [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.
-                TypeHasProperties<KeywordDto>(fields))
+                TypeHasProperties<CharmDto>(fields))
             {
                 return BadRequest();
             }
@@ -434,10 +434,10 @@ namespace ExaltedCharm.Api.Controllers
             var links = new List<LinkDto>
             {
                 string.IsNullOrWhiteSpace(fields)
-                    ? new LinkDto(_urlHelper.Link("GetCharmsForCharmType", new {id = id, charmTypeId = charmTypeId}),
+                    ? new LinkDto(_urlHelper.Link("GetCharm", new {id = id, charmTypeId = charmTypeId}),
                         "self", "GET")
                     : new LinkDto(
-                        _urlHelper.Link("GetCharmsForCharmType",
+                        _urlHelper.Link("GetCharm",
                             new {id = id, charmTypeId = charmTypeId, fields = fields}), "self", "GET"),
                 new LinkDto(_urlHelper.Link("DeleteCharm", new {charmTypeId = charmTypeId, id = id}), "delete_charm",
                     "DELETE"),
