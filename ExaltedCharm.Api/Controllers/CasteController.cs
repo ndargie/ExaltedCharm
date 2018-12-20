@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace ExaltedCharm.Api.Controllers
 {
-    [Route("api/exaltedType")]
+    [Route("api/exaltedTypes")]
     public class CasteController : Controller
     {
         private readonly ILogger<CasteController> _logger;
@@ -298,6 +298,120 @@ namespace ExaltedCharm.Api.Controllers
             return NoContent();
         }
 
+        [HttpGet("{exaltedTypeId}/castes/{id}/abilities", Name = "GetAbilitiesForCaste")]
+        public IActionResult GetAbilities(int exaltedTypeId, int id)
+        {
+            if (!_repository.GetExists<ExaltedType>(x => x.Id == exaltedTypeId))
+            {
+                return NotFound();
+            }
+
+            var caste = _repository.GetFirst<Caste>(x => x.Id == id && x.ExaltedTypeId == exaltedTypeId, null,
+                "Abilities.Ability");
+            if (caste == null)
+            {
+                return NotFound();
+            }
+
+            var abilities = Mapper.Map<IEnumerable<AbilityDto>>(caste.Abilities.Select(x => x.Ability)).Select(x =>
+            {
+                x = x.GenerateLinks(_urlHelper, exaltedTypeId, id);
+                return x;
+            });
+            return Ok(abilities);
+
+        }
+
+        [HttpGet("{exaltedTypeId}/castes/{id}/abilities/{abilityId}", Name = "GetCasteAbility")]
+        public IActionResult GetAbility(int exaltedTypeId, int id, int abilityId)
+        {
+            if (!_repository.GetExists<ExaltedType>(x => x.Id == exaltedTypeId))
+            {
+                return NotFound();
+            }
+            var caste = _repository.GetFirst<Caste>(x => x.Id == id && x.ExaltedTypeId == exaltedTypeId, null, "Abilities.Ability");
+            if (caste == null)
+            {
+                return NotFound();
+            }
+
+            if (caste.Abilities.All(x => x.AbilityId != abilityId))
+            {
+                return NotFound();
+            }
+
+            var ability =
+                Mapper.Map<AbilityDto>(caste.Abilities.Single(x => x.AbilityId == abilityId).Ability);
+            return Ok(ability.GenerateLinks(_urlHelper, exaltedTypeId, id));
+        }
+
+        [HttpPut("{exaltedTypeId}/castes/{id}/abilities/{abilityId}", Name = "AddAbilityToCaste")]
+        public IActionResult AddAbility(int exaltedTypeId, int id, int abilityId)
+        {
+            if (!_repository.GetExists<ExaltedType>(x => x.Id == exaltedTypeId))
+            {
+                return NotFound();
+            }
+
+            var caste = _repository.GetFirst<Caste>(x => x.Id == id && x.ExaltedTypeId == exaltedTypeId, null,
+                "Abilities.Ability");
+            if (caste == null)
+            {
+                return NotFound();
+            }
+
+            var ability = _repository.GetFirst<Ability>(x => x.Id == abilityId);
+
+            if (ability == null)
+            {
+                return NotFound();
+            }
+
+            if (caste.Abilities.All(x => x.AbilityId != abilityId))
+            {
+                caste.Abilities.Add(new CasteAbility() {Ability = ability, Caste = caste});
+                _repository.Update(caste);
+                if (!_repository.Save())
+                {
+                    return StatusCode(500, "A problem happened while handling your request");
+                }
+            }
+            return CreatedAtRoute("GetCasteAbility", new { exaltedTypeId, id, abilityId },
+                Mapper.Map<AbilityDto>(ability).GenerateLinks(_urlHelper, exaltedTypeId, id));
+        }
+
+        [HttpDelete]
+        [HttpPut("{exaltedTypeId}/castes/{id}/abilities/{abilityId}", Name = "RemoveAbilityFromCaste")]
+        public IActionResult RemoveAbility(int exaltedTypeId, int id, int abilityId)
+        {
+            if (!_repository.GetExists<ExaltedType>(x => x.Id == exaltedTypeId))
+            {
+                return NotFound();
+            }
+
+            var caste = _repository.GetFirst<Caste>(x => x.Id == id && x.ExaltedTypeId == exaltedTypeId, null,
+                "Abilities.Ability");
+            if (caste == null)
+            {
+                return NotFound();
+            }
+
+            var ability = caste.Abilities.SingleOrDefault(x => x.AbilityId == abilityId);
+
+            if (ability == null)
+            {
+                return NotFound();
+            }
+
+            caste.Abilities.Remove(ability);
+            _repository.Update(caste);
+            if (!_repository.Save())
+            {
+                return StatusCode(500, "A problem happened while handling your request");
+            }
+
+            return NoContent();
+        }
 
         private IEnumerable<LinkDto> CreateLinksForCaste(int id, int exaltedTypeId, string fields)
         {
@@ -309,9 +423,13 @@ namespace ExaltedCharm.Api.Controllers
                     : new LinkDto(
                         _urlHelper.Link("GetCaste",
                             new {id = id, exaltedTypeId = exaltedTypeId, fields = fields}), "self", "GET"),
-                new LinkDto(_urlHelper.Link("DeleteCaste", new {exaltedTypeId = exaltedTypeId, id = id}), "delete_caste",
+                new LinkDto(_urlHelper.Link("GetAbilitiesForCaste", new {casteId = id}),
+                    "get_abilities", "GET"),
+                new LinkDto(_urlHelper.Link("DeleteCaste", new {exaltedTypeId = exaltedTypeId, id = id}),
+                    "delete_caste",
                     "DELETE"),
-                new LinkDto(_urlHelper.Link("UpdateCaste", new {exaltedTypeId = exaltedTypeId, id = id}), "update_caste",
+                new LinkDto(_urlHelper.Link("UpdateCaste", new {exaltedTypeId = exaltedTypeId, id = id}),
+                    "update_caste",
                     "PUT"),
                 new LinkDto(_urlHelper.Link("PartiallyUpdateCaste", new {exaltedTypeId = exaltedTypeId, id = id}),
                     "partially_update_caste",

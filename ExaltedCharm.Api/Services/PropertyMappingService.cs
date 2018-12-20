@@ -17,7 +17,9 @@ namespace ExaltedCharm.Api.Services
             _propertyMappings.Add(new PropertyMapping<Keyword, KeywordDto>(_keywordPropertyMapping));
             _propertyMappings.Add(new PropertyMapping<CharmType, CharmTypeDto>(_charmTypePropertyMapping));
             _propertyMappings.Add(new PropertyMapping<Charm, CharmDto>(_charmPropertyMapping));
-            _propertyMappings.Add(new PropertyMapping<ExaltedType, ExaltedTypeWithoutCastesDto>(_exaltedTypePropertyMappin));
+            _propertyMappings.Add(new PropertyMapping<ExaltedType, ExaltedTypeWithoutCastesDto>(_exaltedTypePropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<Caste, CasteDto>(_castePropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<Ability, AbilityDto>(_abilityPropertyMapping));
         }
 
         private readonly Dictionary<string, PropertyMappingValue> _durationPropertyMapping =
@@ -32,8 +34,14 @@ namespace ExaltedCharm.Api.Services
         private readonly Dictionary<string, PropertyMappingValue>
             _charmPropertyMapping = CharmMapping.CharmToCharmDto();
 
-        private readonly Dictionary<string, PropertyMappingValue> _exaltedTypePropertyMappin =
+        private readonly Dictionary<string, PropertyMappingValue> _exaltedTypePropertyMapping =
             ExaltedTypeMappings.ExaltedTypeToExaltedTypeDto();
+
+        private readonly Dictionary<string, PropertyMappingValue> _castePropertyMapping =
+            CasteMappings.CasteToCasteTypeDto();
+
+        private readonly Dictionary<string, PropertyMappingValue> _abilityPropertyMapping =
+            AbilityMappings.CasteToCasteTypeDto();
 
         public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
         {

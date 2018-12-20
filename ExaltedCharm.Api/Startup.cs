@@ -124,6 +124,9 @@ namespace ExaltedCharm.Api
                     cfg.CreateMap<Entities.Caste, Models.CasteDto>();
                     cfg.CreateMap<Models.CasteForCreationDto, Entities.Caste>();
                     cfg.CreateMap<Models.CasteForUpdateDto, Entities.Caste>();
+                    cfg.CreateMap<Entities.Ability, Models.AbilityDto>();
+                    cfg.CreateMap<Models.AbilityForCreationDto, Entities.Ability>();
+                    cfg.CreateMap<Models.AbilityForUpdateDto, Entities.Ability>();
                 });
             app.UseMvc(config =>
             {
