@@ -36,5 +36,16 @@ namespace ExaltedCharm.Api.Extensions
             }
             return ability;
         }
+
+        public static AbilityDto GenerateLinks(this AbilityDto ability, IUrlHelper urlHelper, int charmTypeId,
+            int charmId)
+        {
+            ability.Links.Add(new LinkDto(
+                urlHelper.Link("GetAbilityForCharm", new {charmTypeId = charmTypeId, id = charmId}), "self", "GET"));
+            ability.Links.Add(new LinkDto(
+                urlHelper.Link("SetAbilityForCharm", new {charmTypeId, id = charmTypeId, abilityId = "{abilityId}"}),
+                "add_ability_to_charm", "PUT"));
+            return ability;
+        }
     }
 }

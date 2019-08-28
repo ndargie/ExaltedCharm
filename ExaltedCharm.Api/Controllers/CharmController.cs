@@ -344,6 +344,59 @@ namespace ExaltedCharm.Api.Controllers
             return Ok(keywords);
         }
 
+        [HttpGet("{charmTypeId}/charms/{id}/Ability", Name = "GetAbilityForCharm")]
+        public IActionResult GetAbility(int charmTypeId, int id)
+        {
+            if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))
+            {
+                return NotFound();
+            }
+
+            var charm = _repository.GetFirst<Charm>(x => x.Id == id && x.CharmTypeId == charmTypeId, null, "Ability");
+            if (charm?.Ability == null)
+            {
+                return NotFound();
+            }
+            
+            var ability = Mapper.Map<AbilityDto>(charm.Ability);
+            
+            return Ok(ability.GenerateLinks(_urlHelper, charmTypeId, id));
+        }
+
+        [HttpPut("{charmTypeId}/charms/{id}/Ability/{abilityId}", Name = "SetAbilityForCharm")]
+        public IActionResult AddAbility(int charmTypeId, int id, int abilityId)
+        {
+            if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))
+            {
+                return NotFound();
+            }
+            var charm = _repository.GetFirst<Charm>(x => x.Id == id && x.CharmTypeId == charmTypeId, null, "Ability");
+            if (charm == null)
+            {
+                return NotFound();
+            }
+
+            var ability = _repository.GetFirst<Ability>(x => x.Id == abilityId);
+
+            if (ability == null)
+            {
+                return NotFound();
+            }
+
+            charm.AbilityId = ability.Id;
+            charm.Ability = ability;
+
+            _repository.Update(charm);
+
+            if (!_repository.Save())
+            {
+                return StatusCode(500, "A problem happened while handling your request");
+            }
+
+            return CreatedAtRoute("GetAbilityForCharm", new {charmTypeId, id},
+                Mapper.Map<AbilityDto>(ability).GenerateLinks(_urlHelper, charmTypeId, id));
+        }
+
         [HttpGet("{charmTypeId}/charms/{id}/keywords/{keywordId}", Name = "GetCharmKeyword")]
         public IActionResult GetKeyword(int charmTypeId, int id, int keywordId)
         {
