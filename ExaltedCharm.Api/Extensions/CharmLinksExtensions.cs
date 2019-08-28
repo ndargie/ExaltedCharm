@@ -1,7 +1,7 @@
 ﻿using ExaltedCharm.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ExaltedCharm.Api.Helpers
+namespace ExaltedCharm.Api.Extensions
 {
     public static class CharmLinksExtensions
     {

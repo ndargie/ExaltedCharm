@@ -2,6 +2,7 @@
 using System.Linq;
 using AutoMapper;
 using ExaltedCharm.Api.Entities;
+using ExaltedCharm.Api.Extensions;
 using ExaltedCharm.Api.Helpers;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
@@ -165,7 +166,7 @@ namespace ExaltedCharm.Api.Controllers
             return Ok(Mapper.Map<IEnumerable<CharmDto>>(duration.Charms));
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateDuration")]
         public IActionResult CreateDuration([FromBody] SaveDurationDto duration,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -312,15 +313,15 @@ namespace ExaltedCharm.Api.Controllers
             var links = new List<LinkDto>
             {
                 string.IsNullOrWhiteSpace(fields)
-                    ? new LinkDto(_urlHelper.Link("GetDuration", new {id = id}), "self", "GET")
-                    : new LinkDto(_urlHelper.Link("GetDuration", new {id = id, fields = fields}), "self", "GET"),
-                new LinkDto(_urlHelper.Link("GetCharmsForDuration", new {id = id}),
+                    ? new LinkDto(_urlHelper.Link("GetDuration", new {id}), "self", "GET")
+                    : new LinkDto(_urlHelper.Link("GetDuration", new {id, fields}), "self", "GET"),
+                new LinkDto(_urlHelper.Link("GetCharmsForDuration", new {id}),
                     "get-charms", "GET"),
-                new LinkDto(_urlHelper.Link("DeleteDuration", new {id = id}), "delete_duration",
+                new LinkDto(_urlHelper.Link("DeleteDuration", new {id}), "delete_duration",
                     "DELETE"),
-                new LinkDto(_urlHelper.Link("UpdateDuration", new {id = id}), "update_duration",
+                new LinkDto(_urlHelper.Link("UpdateDuration", new {id}), "update_duration",
                     "PUT"),
-                new LinkDto(_urlHelper.Link("PartiallyUpdateDuration", new {id = id}),
+                new LinkDto(_urlHelper.Link("PartiallyUpdateDuration", new {id}),
                     "partially_update_duration",
                     "PATCH")
             };

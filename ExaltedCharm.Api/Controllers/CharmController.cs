@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using ExaltedCharm.Api.Entities;
+using ExaltedCharm.Api.Extensions;
 using ExaltedCharm.Api.Helpers;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
@@ -177,7 +178,7 @@ namespace ExaltedCharm.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))
@@ -214,7 +215,7 @@ namespace ExaltedCharm.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             if (!_repository.GetExists<CharmType>(x => x.Id == charmTypeId))
@@ -270,7 +271,7 @@ namespace ExaltedCharm.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             if (charmToPatch.Description == charmToPatch.Name)
@@ -282,7 +283,7 @@ namespace ExaltedCharm.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             Mapper.Map(charmToPatch, charmEntity);
@@ -434,19 +435,19 @@ namespace ExaltedCharm.Api.Controllers
             var links = new List<LinkDto>
             {
                 string.IsNullOrWhiteSpace(fields)
-                    ? new LinkDto(_urlHelper.Link("GetCharm", new {id = id, charmTypeId = charmTypeId}),
+                    ? new LinkDto(_urlHelper.Link("GetCharm", new {id, charmTypeId}),
                         "self", "GET")
                     : new LinkDto(
                         _urlHelper.Link("GetCharm",
-                            new {id = id, charmTypeId = charmTypeId, fields = fields}), "self", "GET"),
-                new LinkDto(_urlHelper.Link("DeleteCharm", new {charmTypeId = charmTypeId, id = id}), "delete_charm",
+                            new {id, charmTypeId, fields}), "self", "GET"),
+                new LinkDto(_urlHelper.Link("DeleteCharm", new {charmTypeId, id}), "delete_charm",
                     "DELETE"),
-                new LinkDto(_urlHelper.Link("UpdateCharm", new {charmTypeId = charmTypeId, id = id}), "update_charm",
+                new LinkDto(_urlHelper.Link("UpdateCharm", new {charmTypeId, id}), "update_charm",
                     "PUT"),
-                new LinkDto(_urlHelper.Link("PartiallyUpdateCharm", new {charmTypeId = charmTypeId, id = id}),
+                new LinkDto(_urlHelper.Link("PartiallyUpdateCharm", new {charmTypeId, id}),
                     "partially_update_charm",
                     "PATCH"),
-                new LinkDto(_urlHelper.Link("GetKeywordsForCharm", new {charmTypeId = charmTypeId, id = id}),
+                new LinkDto(_urlHelper.Link("GetKeywordsForCharm", new {charmTypeId, id}),
                     "get_keywords_for_charm", "GET")
             };
 

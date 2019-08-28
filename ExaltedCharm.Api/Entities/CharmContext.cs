@@ -80,5 +80,6 @@ namespace ExaltedCharm.Api.Entities
         public DbSet<Ability> Abilities { get; set; }
         public DbSet<Caste> Castes { get; set; }
         public DbSet<CasteAbility> CasteAbilities { get; set; }
+        public DbSet<Attribute> Attributes { get; set; }
     }
 }

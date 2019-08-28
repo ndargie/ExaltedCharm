@@ -17,6 +17,7 @@ namespace ExaltedCharm.Api.Entities
         public string NecromancyLimit { get; set; }
         [MaxLength(100)]
         public string SorceryLimit { get; set; }
+        public string Examples { get; set; }
         public ICollection<Caste> Castes { get; set; }
     }
 }

@@ -239,6 +239,67 @@ namespace ExaltedCharm.Api.Entities
                 context.Abilities.AddRange(abilities);
                 context.SaveChanges();
 
+                var attibutes = new List<Attribute>()
+                {
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Strength",
+                        Type = AttributeType.Physical
+                    },
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Dexterity",
+                        Type = AttributeType.Physical
+                    },
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Stamina",
+                        Type = AttributeType.Physical
+                    },
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Charisma",
+                        Type = AttributeType.Social
+                    },
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Manipulation",
+                        Type = AttributeType.Social
+                    },
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Appearance",
+                        Type = AttributeType.Social
+                    },
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Perception",
+                        Type = AttributeType.Mental
+                    },
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Intelligence",
+                        Type = AttributeType.Mental
+                    },
+                    new Attribute()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Wits",
+                        Type = AttributeType.Mental
+                    }
+                };
+
+                context.Attributes.AddRange(attibutes);
+                context.SaveChanges();
+
                 var dawnCaste = castes.Single(x => x.Name == "Dawn");
 
                 var dawnSkills = new List<CasteAbility>()
@@ -270,7 +331,7 @@ namespace ExaltedCharm.Api.Entities
                     },
                     new CasteAbility()
                     {
-                        Ability = abilities.Single(x => x.Name == "Melee"), 
+                        Ability = abilities.Single(x => x.Name == "Melee"),
                         Caste = dawnCaste
                     },
                     new CasteAbility()
@@ -291,7 +352,7 @@ namespace ExaltedCharm.Api.Entities
                 };
 
                 var zenithCaste = castes.Single(x => x.Name == "Zenith");
-                var zenithSkills = new List< CasteAbility>()
+                var zenithSkills = new List<CasteAbility>()
                 {
                     new CasteAbility()
                     {
@@ -646,7 +707,7 @@ namespace ExaltedCharm.Api.Entities
                             Description = "",
                             CreatedDate = DateTime.Now
                         }
-                        
+
                     };
                 context.Keywords.AddRange(keywords);
                 context.SaveChanges();

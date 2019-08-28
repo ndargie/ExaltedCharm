@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using ExaltedCharm.Api.Entities;
+using ExaltedCharm.Api.Extensions;
 using ExaltedCharm.Api.Helpers;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
@@ -163,7 +164,7 @@ namespace ExaltedCharm.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             if (!_repository.GetExists<ExaltedType>(x => x.Id == exaltedTypeId))
@@ -196,7 +197,7 @@ namespace ExaltedCharm.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             if (!_repository.GetExists<ExaltedType>(x => x.Id == exaltedTypeId))
@@ -255,14 +256,14 @@ namespace ExaltedCharm.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             TryValidateModel(casteToPatch);
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             Mapper.Map(casteToPatch, casteEntity);
@@ -418,20 +419,20 @@ namespace ExaltedCharm.Api.Controllers
             var links = new List<LinkDto>
             {
                 string.IsNullOrWhiteSpace(fields)
-                    ? new LinkDto(_urlHelper.Link("GetCaste", new {id = id, exaltedTypeId = exaltedTypeId}),
+                    ? new LinkDto(_urlHelper.Link("GetCaste", new {id, exaltedTypeId}),
                         "self", "GET")
                     : new LinkDto(
                         _urlHelper.Link("GetCaste",
-                            new {id = id, exaltedTypeId = exaltedTypeId, fields = fields}), "self", "GET"),
+                            new {id, exaltedTypeId, fields}), "self", "GET"),
                 new LinkDto(_urlHelper.Link("GetAbilitiesForCaste", new {casteId = id}),
                     "get_abilities", "GET"),
-                new LinkDto(_urlHelper.Link("DeleteCaste", new {exaltedTypeId = exaltedTypeId, id = id}),
+                new LinkDto(_urlHelper.Link("DeleteCaste", new {exaltedTypeId, id}),
                     "delete_caste",
                     "DELETE"),
-                new LinkDto(_urlHelper.Link("UpdateCaste", new {exaltedTypeId = exaltedTypeId, id = id}),
+                new LinkDto(_urlHelper.Link("UpdateCaste", new {exaltedTypeId, id}),
                     "update_caste",
                     "PUT"),
-                new LinkDto(_urlHelper.Link("PartiallyUpdateCaste", new {exaltedTypeId = exaltedTypeId, id = id}),
+                new LinkDto(_urlHelper.Link("PartiallyUpdateCaste", new {exaltedTypeId, id}),
                     "partially_update_caste",
                     "PATCH")
             };

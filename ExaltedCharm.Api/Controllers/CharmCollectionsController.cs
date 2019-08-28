@@ -31,7 +31,7 @@ namespace ExaltedCharm.Api.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new UnprocessableEntityObjectResult(ModelState);
             }
 
             var charmType = _repository.GetAll<CharmType>().SingleOrDefault(x => x.Id == charmTypeId);

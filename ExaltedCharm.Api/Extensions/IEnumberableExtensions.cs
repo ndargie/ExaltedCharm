@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Reflection;
 
-namespace ExaltedCharm.Api.Helpers
+namespace ExaltedCharm.Api.Extensions
 {
     public static class IEnumberableExtensions
     {

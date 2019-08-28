@@ -2,6 +2,7 @@
 using System.Linq;
 using AutoMapper;
 using ExaltedCharm.Api.Entities;
+using ExaltedCharm.Api.Extensions;
 using ExaltedCharm.Api.Helpers;
 using ExaltedCharm.Api.Models;
 using ExaltedCharm.Api.Services;
@@ -283,14 +284,14 @@ namespace ExaltedCharm.Api.Controllers
             var links = new List<LinkDto>
             {
                 string.IsNullOrWhiteSpace(fields)
-                    ? new LinkDto(_urlHelper.Link("GetCharmType", new {id = id, includeCharms = includeCharms}), "self", "GET")
-                    : new LinkDto(_urlHelper.Link("GetCharmType", new {id = id, includeCharms = includeCharms, fields = fields}), "self", "GET"),
-                new LinkDto(_urlHelper.Link("DeleteCharmType", new {id = id}), "delete_charmtype",
+                    ? new LinkDto(_urlHelper.Link("GetCharmType", new {id, includeCharms}), "self", "GET")
+                    : new LinkDto(_urlHelper.Link("GetCharmType", new {id, includeCharms, fields}), "self", "GET"),
+                new LinkDto(_urlHelper.Link("DeleteCharmType", new {id}), "delete_charmtype",
                     "DELETE"),
                 new LinkDto(_urlHelper.Link("GetCharmsForCharmType", new {charmTypeId = id}), "get_charms", "GET"),
-                new LinkDto(_urlHelper.Link("UpdateCharmType", new {id = id}), "update_charmtype",
+                new LinkDto(_urlHelper.Link("UpdateCharmType", new {id}), "update_charmtype",
                     "PUT"),
-                new LinkDto(_urlHelper.Link("PartiallyUpdateCharmType", new {id = id}),
+                new LinkDto(_urlHelper.Link("PartiallyUpdateCharmType", new {id}),
                     "partially_update_charmtype",
                     "PATCH")
             };
