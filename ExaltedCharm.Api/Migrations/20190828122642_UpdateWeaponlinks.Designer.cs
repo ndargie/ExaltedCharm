@@ -13,9 +13,10 @@ using System;
 namespace ExaltedCharm.Api.Migrations
 {
     [DbContext(typeof(CharmContext))]
-    partial class CharmContextModelSnapshot : ModelSnapshot
+    [Migration("20190828122642_UpdateWeaponlinks")]
+    partial class UpdateWeaponlinks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

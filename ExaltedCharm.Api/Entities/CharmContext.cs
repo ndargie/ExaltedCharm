@@ -1,7 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExaltedCharm.Api.Entities
@@ -15,6 +13,26 @@ namespace ExaltedCharm.Api.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<WeaponWeaponTag>().HasKey(t => new { t.WeaponId, t.WeaponTagId });
+            modelBuilder.Entity<WeaponWeaponTag>()
+                .HasOne(pt => pt.Weapon)
+                .WithMany(p => p.Tags)
+                .HasForeignKey(pt => pt.WeaponId);
+            modelBuilder.Entity<WeaponWeaponTag>()
+                .HasOne(pt => pt.WeaponTag)
+                .WithMany(t => t.Weapons)
+                .HasForeignKey(pt => pt.WeaponTagId);
+
+            modelBuilder.Entity<RangedWeaponAmmo>().HasKey(t => new { t.RangedWeaponId, t.AmmoTypeId });
+            modelBuilder.Entity<RangedWeaponAmmo>()
+                .HasOne(pt => pt.RangedWeapon)
+                .WithMany(p => p.AmmoTypes)
+                .HasForeignKey(pt => pt.RangedWeaponId);
+            modelBuilder.Entity<RangedWeaponAmmo>()
+                .HasOne(pt => pt.AmmoType)
+                .WithMany(t => t.RangedWeapons)
+                .HasForeignKey(pt => pt.AmmoTypeId);
+
             modelBuilder.Entity<KeywordCharm>().HasKey(t => new {t.CharmId, t.KeywordId});
             modelBuilder.Entity<KeywordCharm>()
                 .HasOne(pt => pt.Charm)
@@ -54,6 +72,17 @@ namespace ExaltedCharm.Api.Entities
             });
             modelBuilder.Entity<Caste>(entity => entity.HasIndex(e => e.Name).IsUnique());
             modelBuilder.Entity<ExaltedType>(entity => entity.HasIndex(e => e.Name).IsUnique());
+            modelBuilder.Entity<Weapon>(entity =>
+            {
+                entity.HasIndex(e => e.Name).IsUnique();
+                entity.HasMany(e => e.Tags);
+            });
+
+            modelBuilder.Entity<WeaponTag>(entity => { entity.HasMany(m => m.Weapons); });
+
+            modelBuilder.Entity<RangedWeapon>(entity => { entity.HasMany(e => e.AmmoTypes); });
+            modelBuilder.Entity<AmmoType>(entity => { entity.HasMany(e => e.RangedWeapons); });
+
         }
 
         public override int SaveChanges()
@@ -81,5 +110,7 @@ namespace ExaltedCharm.Api.Entities
         public DbSet<Caste> Castes { get; set; }
         public DbSet<CasteAbility> CasteAbilities { get; set; }
         public DbSet<Attribute> Attributes { get; set; }
+        public DbSet<WeaponTag> WeaponTags { get; set; }
+        public DbSet<Weapon> Weapons { get; set; }
     }
 }

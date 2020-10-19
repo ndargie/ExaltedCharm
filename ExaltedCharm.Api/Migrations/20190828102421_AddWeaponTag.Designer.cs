@@ -7,15 +7,15 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
 using System;
 
 namespace ExaltedCharm.Api.Migrations
 {
     [DbContext(typeof(CharmContext))]
-    partial class CharmContextModelSnapshot : ModelSnapshot
+    [Migration("20190828102421_AddWeaponTag")]
+    partial class AddWeaponTag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,36 +50,6 @@ namespace ExaltedCharm.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Abilities");
-                });
-
-            modelBuilder.Entity("ExaltedCharm.Api.Entities.AmmoType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(200);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<int>("Damage");
-
-                    b.Property<int>("DamageType");
-
-                    b.Property<string>("Description");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(200);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("Rate");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AmmoType");
                 });
 
             modelBuilder.Entity("ExaltedCharm.Api.Entities.Attribute", b =>
@@ -350,62 +320,6 @@ namespace ExaltedCharm.Api.Migrations
                     b.ToTable("KeywordCharms");
                 });
 
-            modelBuilder.Entity("ExaltedCharm.Api.Entities.RangedWeaponAmmo", b =>
-                {
-                    b.Property<int>("RangedWeaponId");
-
-                    b.Property<int>("AmmoTypeId");
-
-                    b.HasKey("RangedWeaponId", "AmmoTypeId");
-
-                    b.HasIndex("AmmoTypeId");
-
-                    b.ToTable("RangedWeaponAmmo");
-                });
-
-            modelBuilder.Entity("ExaltedCharm.Api.Entities.Weapon", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Accuracy");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(200);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<int>("Damage");
-
-                    b.Property<int>("DamageType");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired();
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(200);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100);
-
-                    b.Property<int>("Rate");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Weapons");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Weapon");
-                });
-
             modelBuilder.Entity("ExaltedCharm.Api.Entities.WeaponTag", b =>
                 {
                     b.Property<int>("Id")
@@ -431,30 +345,6 @@ namespace ExaltedCharm.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WeaponTags");
-                });
-
-            modelBuilder.Entity("ExaltedCharm.Api.Entities.WeaponWeaponTag", b =>
-                {
-                    b.Property<int>("WeaponId");
-
-                    b.Property<int>("WeaponTagId");
-
-                    b.HasKey("WeaponId", "WeaponTagId");
-
-                    b.HasIndex("WeaponTagId");
-
-                    b.ToTable("WeaponWeaponTag");
-                });
-
-            modelBuilder.Entity("ExaltedCharm.Api.Entities.RangedWeapon", b =>
-                {
-                    b.HasBaseType("ExaltedCharm.Api.Entities.Weapon");
-
-                    b.Property<int>("Range");
-
-                    b.ToTable("RangedWeapon");
-
-                    b.HasDiscriminator().HasValue("RangedWeapon");
                 });
 
             modelBuilder.Entity("ExaltedCharm.Api.Entities.Caste", b =>
@@ -510,32 +400,6 @@ namespace ExaltedCharm.Api.Migrations
                     b.HasOne("ExaltedCharm.Api.Entities.Keyword", "Keyword")
                         .WithMany("Charms")
                         .HasForeignKey("KeywordId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("ExaltedCharm.Api.Entities.RangedWeaponAmmo", b =>
-                {
-                    b.HasOne("ExaltedCharm.Api.Entities.AmmoType", "AmmoType")
-                        .WithMany("RangedWeapons")
-                        .HasForeignKey("AmmoTypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("ExaltedCharm.Api.Entities.RangedWeapon", "RangedWeapon")
-                        .WithMany("AmmoTypes")
-                        .HasForeignKey("RangedWeaponId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("ExaltedCharm.Api.Entities.WeaponWeaponTag", b =>
-                {
-                    b.HasOne("ExaltedCharm.Api.Entities.Weapon", "Weapon")
-                        .WithMany("Tags")
-                        .HasForeignKey("WeaponId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("ExaltedCharm.Api.Entities.WeaponTag", "WeaponTag")
-                        .WithMany("Weapons")
-                        .HasForeignKey("WeaponTagId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

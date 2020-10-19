@@ -34,7 +34,6 @@ namespace ExaltedCharm.Api.Controllers
                     new LinkDto(_urlHelper.Link("CreateKeyword", new { }), "create_keyword", "POST")
                 };
                 return Ok(links);
-
             }
 
             return NoContent();

@@ -76,6 +76,43 @@ namespace ExaltedCharm.Api.Entities
 
                 context.SaveChanges();
 
+                var weaponTags = new List<WeaponTag>()
+                {
+                    new WeaponTag()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Thrown",
+                        Description = "Can be thrown"
+                    },
+                    new WeaponTag()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Piercing",
+                        Description = "Halfs armour defense"
+                    },
+                    new WeaponTag()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Disarm",
+                        Description = "Can perform the disarm manover"
+                    },
+                    new WeaponTag()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Clinch",
+                        Description = "Can perform the clinch manover"
+                    },
+                    new WeaponTag()
+                    {
+                        CreatedDate = DateTime.Now,
+                        Name = "Charge bonus",
+                        Description = "Bonus damage on charge"
+                    }
+                };
+
+                context.WeaponTags.AddRange(weaponTags);
+                context.SaveChanges();
+
                 var abilities = new List<Ability>()
                 {
                     new Ability()

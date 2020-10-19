@@ -20,6 +20,8 @@ namespace ExaltedCharm.Api.Services
             _propertyMappings.Add(new PropertyMapping<ExaltedType, ExaltedTypeWithoutCastesDto>(_exaltedTypePropertyMapping));
             _propertyMappings.Add(new PropertyMapping<Caste, CasteDto>(_castePropertyMapping));
             _propertyMappings.Add(new PropertyMapping<Ability, AbilityDto>(_abilityPropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<WeaponTag, WeaponTagDto>(_weaponTagPropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<RangedWeapon, RangedWeaponDto>(_rangedWeaponPropertyMapping));
         }
 
         private readonly Dictionary<string, PropertyMappingValue> _durationPropertyMapping =
@@ -42,6 +44,13 @@ namespace ExaltedCharm.Api.Services
 
         private readonly Dictionary<string, PropertyMappingValue> _abilityPropertyMapping =
             AbilityMappings.CasteToCasteTypeDto();
+
+        private readonly Dictionary<string, PropertyMappingValue> _weaponTagPropertyMapping =
+            WeaponTagMappings.WeaponTagToWeaponTagDto();
+
+        private readonly Dictionary<string, PropertyMappingValue> _rangedWeaponPropertyMapping =
+            RangedWeaponMappings.RangedWeaponToRangedWeaponDto();
+
 
         public Dictionary<string, PropertyMappingValue> GetPropertyMapping<TSource, TDestination>()
         {

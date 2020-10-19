@@ -92,7 +92,6 @@ namespace ExaltedCharm.Api.Controllers
                 };
 
                 return Ok(linkedCollectionResource);
-
             }
             else
             {
@@ -103,7 +102,6 @@ namespace ExaltedCharm.Api.Controllers
                 Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageMetsaData));
                 return Ok(Mapper.Map<IEnumerable<AbilityDto>>(pagedList).ShapeData(abilityResourceParameter.Fields));
             }
-
         }
 
         [HttpGet("{id}", Name = "GetAbility")]
